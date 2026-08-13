@@ -84,9 +84,7 @@ if find "${DEB_DIRECTORY}" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null | gr
     exit 1
 fi
 
-mkdir --parents -- "${REPOSITORY_DIRECTORY}/src-tauri/target"
-readonly WORK_DIRECTORY="$(mktemp -d \
-    "${REPOSITORY_DIRECTORY}/src-tauri/target/hunk-packaging.XXXXXX")"
+readonly WORK_DIRECTORY="$(mktemp -d)"
 cleanup() {
     rm -rf -- "${WORK_DIRECTORY}"
     rm -f -- "${FLATPAK_PAYLOAD}"
