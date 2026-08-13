@@ -99,7 +99,9 @@ CCACHE_DIR="${REPOSITORY_DIRECTORY}/src-tauri/target/ccache" \
     LDAI_NO_APPSTREAM=1 \
     NO_STRIP=1 \
     XDG_CACHE_HOME="${REPOSITORY_DIRECTORY}/src-tauri/target/xdg-cache" \
-    pnpm --dir "${REPOSITORY_DIRECTORY}" tauri build --bundles appimage,deb
+    pnpm --dir "${REPOSITORY_DIRECTORY}" tauri build \
+        --config "${REPOSITORY_DIRECTORY}/src-tauri/tauri.bundle.conf.json" \
+        --bundles appimage,deb
 
 mapfile -t deb_packages < <(find "${DEB_DIRECTORY}" -maxdepth 1 -type f -name '*.deb' -print)
 if [[ ${#deb_packages[@]} -ne 1 ]]; then

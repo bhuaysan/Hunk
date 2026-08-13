@@ -35,7 +35,6 @@
     "shortDescription": "Create and manage optical CHD images",
     "longDescription": "A local workbench for discovering, creating, extracting, inspecting, and verifying optical CHD images.",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"],
-    "externalBin": ["binaries/chdman"],
     "linux": {
       "appimage": {
         "files": {

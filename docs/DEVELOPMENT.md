@@ -38,6 +38,8 @@ backend. Real conversions require the approved sidecar:
 
 The build script downloads one exact MAME commit, verifies its SHA-256, builds only `chdman`, and
 refuses to replace an existing output. Generated files remain under ignored directories.
+Normal development, lint, and test builds do not require a placeholder sidecar; the package-only
+Tauri configuration adds the external binary after the packaging script has verified it exists.
 
 ## Repository map
 
