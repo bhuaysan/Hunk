@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-13
+
 ### Changed
 
 - Updated the release dependency set to remove known `quick-xml` and `time` security
@@ -30,3 +32,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Equivalent English and German project entry points.
 - Initial product, implementation, documentation, and release specification.
 - End-to-end conversion validation with generated CD/DVD fixtures, deterministic safety fault coverage, approved-sidecar round trips, and an opt-in local representative-media harness.
+
+[Unreleased]: https://github.com/bhuaysan/Hunk/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/bhuaysan/Hunk/releases/tag/v0.1.0

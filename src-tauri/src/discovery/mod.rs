@@ -166,10 +166,10 @@ fn walk_directory(
         }
         if file_type.is_dir() {
             walk_directory(&path, candidates, visited_directories, issues);
-        } else if file_type.is_file() {
-            if let Some(format) = source_format(&path) {
-                insert_candidate(&path, format, candidates);
-            }
+        } else if file_type.is_file()
+            && let Some(format) = source_format(&path)
+        {
+            insert_candidate(&path, format, candidates);
         }
     }
 }

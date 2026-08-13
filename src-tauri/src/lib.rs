@@ -151,10 +151,10 @@ fn resolve_chdman(app: &tauri::AppHandle) -> PathBuf {
     if let Ok(resource_directory) = app.path().resource_dir() {
         add_chdman_candidates(&mut candidates, &resource_directory, target_file_name);
     }
-    if let Ok(executable) = std::env::current_exe() {
-        if let Some(executable_directory) = executable.parent() {
-            add_chdman_candidates(&mut candidates, executable_directory, target_file_name);
-        }
+    if let Ok(executable) = std::env::current_exe()
+        && let Some(executable_directory) = executable.parent()
+    {
+        add_chdman_candidates(&mut candidates, executable_directory, target_file_name);
     }
     candidates.push(
         Path::new(env!("CARGO_MANIFEST_DIR"))

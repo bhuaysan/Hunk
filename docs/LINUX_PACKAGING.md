@@ -19,8 +19,7 @@ commit archive, and runs both packages under an X11 fallback display before reta
 workflow artifact. The build disables `linuxdeploy` stripping because its embedded older binutils
 cannot process modern RELR sections on current Fedora hosts; Hunk's Rust release profile is already
 configured to strip the application binary. AppImage's duplicate automatic AppStream check is
-disabled while the canonical metadata is validated explicitly; its public homepage is intentionally
-added in M8 only after a public repository location has been approved.
+disabled while the canonical metadata is validated explicitly before every package build.
 
 ## Local package build
 
@@ -98,11 +97,11 @@ For a graphical session, launch each generated artifact with the bounded smoke h
 
 ```sh
 ./scripts/smoke-test-linux-package.sh --appimage \
-  src-tauri/target/release/bundle/appimage/Hunk_0.0.0_amd64.AppImage
+  src-tauri/target/release/bundle/appimage/Hunk_0.1.0_amd64.AppImage
 ./scripts/smoke-test-linux-package.sh --flatpak \
   src-tauri/target/release/bundle/flatpak/Hunk_x86_64.flatpak
 ```
 
 The helper uses an isolated Flatpak user installation and removes it after the launch window. The
 release checklist requires successful runs on Fedora KDE/Wayland and Ubuntu 22.04 (the package build
-baseline), plus the portal exercise above. Exact filenames change when M8 aligns the release version.
+baseline), plus the portal exercise above.

@@ -13,16 +13,8 @@ done
 
 desktop-file-validate "${REPOSITORY_DIRECTORY}/packaging/app.hunk.Hunk.desktop"
 
-# A public homepage is intentionally added only during M8, after a public location is approved.
-# AppStream 0.15 (the Ubuntu 22.04 baseline) predates per-tag severity overrides.
-if appstreamcli validate --help 2>&1 | grep -q -- '--override'; then
-    appstreamcli validate --no-net \
-        --override=url-homepage-missing=pedantic \
-        "${REPOSITORY_DIRECTORY}/packaging/app.hunk.Hunk.metainfo.xml"
-else
-    appstreamcli validate --no-net \
-        "${REPOSITORY_DIRECTORY}/packaging/app.hunk.Hunk.metainfo.xml"
-fi
+appstreamcli validate --no-net \
+    "${REPOSITORY_DIRECTORY}/packaging/app.hunk.Hunk.metainfo.xml"
 
 bash -n \
     "${REPOSITORY_DIRECTORY}/scripts/build-chdman.sh" \

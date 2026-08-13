@@ -1087,13 +1087,13 @@ fn cleanup_owned_temporary_paths(record: &JobRecord) {
         };
         if name.starts_with(&format!(".hunk-{token}-")) {
             if name.contains("%t") {
-                if let Some(parent) = path.parent() {
-                    if let Ok(entries) = fs::read_dir(parent) {
-                        let prefix = name.split("%t").next().unwrap_or(name);
-                        for entry in entries.filter_map(Result::ok) {
-                            if entry.file_name().to_string_lossy().starts_with(prefix) {
-                                let _ = fs::remove_file(entry.path());
-                            }
+                if let Some(parent) = path.parent()
+                    && let Ok(entries) = fs::read_dir(parent)
+                {
+                    let prefix = name.split("%t").next().unwrap_or(name);
+                    for entry in entries.filter_map(Result::ok) {
+                        if entry.file_name().to_string_lossy().starts_with(prefix) {
+                            let _ = fs::remove_file(entry.path());
                         }
                     }
                 }

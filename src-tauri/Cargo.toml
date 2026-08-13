@@ -1,6 +1,6 @@
 [package]
 name = "hunk"
-version = "0.0.0"
+version = "0.1.0"
 description = "A local desktop workbench for optical CHD images"
 authors = ["Hunk contributors"]
 edition = "2024"

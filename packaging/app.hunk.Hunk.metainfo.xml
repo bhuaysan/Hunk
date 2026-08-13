@@ -27,12 +27,15 @@
       jedes neu erstellte CHD vor der Veröffentlichung.
     </p>
   </description>
+  <url type="homepage">https://github.com/bhuaysan/Hunk</url>
+  <url type="bugtracker">https://github.com/bhuaysan/Hunk/issues</url>
+  <url type="help">https://github.com/bhuaysan/Hunk#readme</url>
   <launchable type="desktop-id">app.hunk.Hunk.desktop</launchable>
   <releases>
-    <release version="0.0.0" date="2026-08-13" type="development">
+    <release version="0.1.0" date="2026-08-13" type="stable">
       <description>
-        <p>Initial development build of the optical CHD workbench.</p>
-        <p xml:lang="de">Erster Entwicklungsstand der optischen CHD-Werkbank.</p>
+        <p>First release of the safe, localized optical CHD workbench.</p>
+        <p xml:lang="de">Erste Veröffentlichung der sicheren, lokalisierten optischen CHD-Werkbank.</p>
       </description>
     </release>
   </releases>

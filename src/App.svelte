@@ -403,7 +403,7 @@
       </select>
     </label>
     <div class="rail-status"><span></span><small>{t(locale, 'localOnly')}</small></div>
-    <span class="version">{t(locale, 'workbench')} · 0.0.0</span>
+    <span class="version">{t(locale, 'workbench')} · 0.1.0</span>
   </aside>
 
   <main>

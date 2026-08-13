@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification; M0–M7 completed.
+Status: accepted specification; M0–M8 completed.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -242,12 +242,24 @@ Target commit: `build: package Hunk for Linux`
 
 ### M8 — Public release preparation
 
-- [ ] Complete README, contribution, security, architecture, development, and release documentation.
-- [ ] Audit dependencies, bundled fonts, sidecar licenses, and source offers/notices.
-- [ ] Audit the complete Git history for media, secrets, personal paths, generated binaries, and oversized files.
-- [ ] Run all unit, integration, UI, packaging, and smoke tests.
-- [ ] Align versions and move changelog entries from `Unreleased` to `0.1.0`.
-- [ ] Prepare but do not push the `v0.1.0` tag without explicit approval.
+- [x] Complete README, contribution, security, architecture, development, and release documentation.
+- [x] Audit dependencies, bundled fonts, sidecar licenses, and source offers/notices.
+- [x] Audit the complete Git history for media, secrets, personal paths, generated binaries, and oversized files.
+- [x] Run all unit, integration, UI, packaging, and smoke tests.
+- [x] Align versions and move changelog entries from `Unreleased` to `0.1.0`.
+- [x] Prepare but do not push the `v0.1.0` tag without explicit approval.
+
+The 0.1.0 audit found and resolved three vulnerable transitive Rust packages. The remaining RustSec
+warnings are upstream GTK3/build dependencies with no patched Tauri-compatible line and are recorded
+with their reachability in the dependency audit. No fonts are bundled. The complete reachable Git
+history contains no media, secrets, personal paths, generated packages/binaries, or oversized blobs;
+the largest blob is below 114 KiB and every commit uses the repository-local GitHub noreply identity.
+
+Frontend formatting, type checks, UI tests and production build; Rust formatting, Clippy and all
+normal tests; the approved real-sidecar capability and generated round-trip tests; the opt-in local
+three-source representative-media harness; packaging metadata; fresh AppImage and Flatpak builds;
+payload/compliance inspection; checksums; and graphical launch smokes all passed. The annotated
+`v0.1.0` tag is prepared locally and intentionally remains unpushed pending separate approval.
 
 Target commits:
 
