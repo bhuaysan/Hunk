@@ -5,7 +5,7 @@ description = "A local desktop workbench for optical CHD images"
 authors = ["Hunk contributors"]
 edition = "2024"
 license = "GPL-3.0-or-later"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [lib]
 name = "hunk_lib"

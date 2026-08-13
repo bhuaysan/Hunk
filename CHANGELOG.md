@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Updated the release dependency set to remove known `quick-xml` and `time` security
+  vulnerabilities found during the 0.1.0 audit.
+
 ### Added
 
 - Reproducible Linux x86_64 AppImage and Flatpak builds with desktop integration, AppStream metadata,
