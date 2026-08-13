@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification, M0 repository foundation completed.
+Status: accepted specification, M0 repository foundation and M1 source discovery completed.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -128,6 +128,8 @@ Every mutating operation follows this sequence:
 
 On failure or cancellation, Hunk may remove only temporary files it created and can positively identify. It must leave all sources and pre-existing destinations untouched. Closing the app with an active job requires confirmation.
 
+CUE and GDI references are resolved relative to their descriptor directory. Both slash styles are accepted, while absolute paths, lexical parent escapes, and symlinks resolving outside that directory are validation errors. Recursive discovery does not follow directory symlinks.
+
 ## 6. Implementation milestones
 
 Each milestone should produce a focused, public-ready Conventional Commit. Split a milestone only when necessary to keep commits reviewable and buildable.
@@ -144,11 +146,11 @@ Target commit: `chore: initialize Hunk workspace`
 
 ### M1 — Source discovery
 
-- [ ] Implement recursive discovery and source-set de-duplication.
-- [ ] Parse CUE and GDI files without shell/path assumptions.
-- [ ] Detect ISO and CHD primary files.
-- [ ] Validate missing, duplicate, escaping, unreadable, and malformed references.
-- [ ] Cover spaces, brackets, Unicode, multiple BIN files, and mixed data/audio tracks.
+- [x] Implement recursive discovery and source-set de-duplication.
+- [x] Parse CUE and GDI files without shell/path assumptions.
+- [x] Detect ISO and CHD primary files.
+- [x] Validate missing, duplicate, escaping, unreadable, and malformed references.
+- [x] Cover spaces, brackets, Unicode, multiple BIN files, and mixed data/audio tracks.
 
 Target commit: `feat(core): discover and validate optical images`
 

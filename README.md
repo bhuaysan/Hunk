@@ -6,7 +6,7 @@ Hunk is a modern, local desktop workbench for creating and managing CHD images u
 
 ## Current status
 
-The repository foundation is complete: Hunk has a launchable Tauri 2 shell with a Svelte 5 and TypeScript frontend, Rust backend, project checks, and continuous integration. Source discovery is the next implementation milestone.
+The repository foundation and source-discovery core are complete. Hunk recursively recognizes CUE/BIN, GDI, ISO, and CHD inputs, groups referenced track files into source sets, and reports unsafe or incomplete descriptors before any conversion can start. `chdman` integration is the next implementation milestone.
 
 The accepted scope and safety model live in [the implementation plan](docs/IMPLEMENTATION_PLAN.md). The concise public direction is in [the roadmap](ROADMAP.md).
 

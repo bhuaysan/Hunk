@@ -6,7 +6,7 @@ Hunk ist eine moderne, lokale Desktop-Werkbank zum Erstellen und Verwalten von C
 
 ## Aktueller Stand
 
-Das Repository-Grundgerüst ist fertig: Hunk besitzt eine startbare Tauri-2-Anwendung mit Svelte 5 und TypeScript im Frontend, einem Rust-Backend, Projektprüfungen und Continuous Integration. Als Nächstes folgt die Quelldateierkennung.
+Das Repository-Grundgerüst und die Quelldateierkennung sind fertig. Hunk erkennt CUE/BIN-, GDI-, ISO- und CHD-Eingaben rekursiv, fasst referenzierte Trackdateien zu Quellsätzen zusammen und meldet unsichere oder unvollständige Deskriptoren, bevor eine Konvertierung beginnen kann. Als Nächstes folgt die `chdman`-Integration.
 
 Der festgelegte Umfang und das Sicherheitsmodell stehen im [Implementierungsplan](docs/IMPLEMENTATION_PLAN.md). Die kompakte öffentliche Planung steht in der [Roadmap](ROADMAP.md).
 
