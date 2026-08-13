@@ -1,7 +1,23 @@
 # Third-party notices
 
-Hunk bundles a separately built `chdman` executable from MAME. Hunk's own license does not replace
-the notices and licenses that apply to MAME and its bundled components.
+Hunk includes open-source Rust and JavaScript dependencies and bundles a separately built `chdman`
+executable from MAME. Hunk's own license does not replace the notices and licenses that apply to
+those works.
+
+## Application dependencies
+
+The exact Rust and JavaScript package versions are recorded in `src-tauri/Cargo.lock` and
+`pnpm-lock.yaml`. Their declared licenses were audited for Hunk 0.1.0 and are compatible with
+distribution under GPL-3.0-or-later. They include Apache-2.0, MIT, BSD, ISC, MPL-2.0, Unicode-3.0,
+Zlib, 0BSD, CC0, MIT-0, and Unlicense alternatives. Copyright and license notices remain with the
+corresponding upstream package sources.
+
+The complete audit scope, security results, accepted transitive warnings, and reproduction procedure
+are documented in [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md). The public Hunk source tag and its
+lockfiles identify the exact application sources corresponding to an official binary release.
+
+Hunk does not bundle fonts. Barlow Semi Condensed, Inter, and JetBrains Mono are optional CSS family
+preferences only; installed system fonts or generic fallbacks are used at runtime.
 
 ## MAME `chdman`
 

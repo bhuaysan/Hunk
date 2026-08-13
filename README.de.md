@@ -1,68 +1,122 @@
 # Hunk
 
-Hunk ist eine moderne, lokale Desktop-Werkbank zum Erstellen und Verwalten von CHD-Abbildern für Emulatoren. Linux ist die erste unterstützte Plattform. Die Anwendung befindet sich in aktiver Entwicklung.
+Hunk ist eine lokale Desktop-Werkbank zum Erstellen und Verwalten optischer CHD-Abbilder für
+Emulatoren. Sie erkennt vollständige Disc-Quellsätze, bietet nur gültige Aktionen an und verarbeitet
+Konvertierungen in einer dauerhaften, kollisionssicheren Warteschlange. Linux x86_64 ist die erste
+unterstützte Plattform.
 
 [English version](README.md)
 
-## Aktueller Stand
+## Veröffentlichungsstatus
 
-Das Repository-Grundgerüst, die Quelldateierkennung, die gepinnte `chdman`-Integration, die dauerhafte verifizierte Job-Engine, die responsive lokalisierte Workbench, die Barrierefreiheitsprüfung, die Ende-zu-Ende-Validierung und die Linux-Paketierung sind fertig. Hunk erkennt CUE/BIN-, GDI-, ISO- und CHD-Eingaben rekursiv, fasst referenzierte Trackdateien zu Quellsätzen zusammen, verarbeitet sie in einer kollisionssicheren seriellen Warteschlange und bewahrt die letzten 100 Job-Einträge lokal auf. Als Nächstes folgt die Vorbereitung der öffentlichen Veröffentlichung.
+Der Quellbaum ist für Hunk 0.1.0 vorbereitet. AppImage- und Flatpak-Pakete erscheinen auf der
+[GitHub-Releases-Seite](https://github.com/bhuaysan/Hunk/releases), sobald eine Binärveröffentlichung
+bereitsteht. Solange dort kein Paket angeboten wird, kann Hunk mit der folgenden Anleitung aus dem
+Quellcode gestartet werden.
 
-Der festgelegte Umfang und das Sicherheitsmodell stehen im [Implementierungsplan](docs/IMPLEMENTATION_PLAN.md). Die kompakte öffentliche Planung steht in der [Roadmap](ROADMAP.md).
+## Funktionen
 
-## Entwicklung
+- Dateien und Ordner über native Dialoge oder Drag-and-drop importieren.
+- CUE/BIN-, GDI-, ISO- und CHD-Quellsätze rekursiv erkennen, ohne referenzierte Tracks zu duplizieren.
+- CD- und DVD-CHDs erstellen und jedes neu erstellte CHD vor der Veröffentlichung vollständig prüfen.
+- CD-CHDs nach CUE/BIN und DVD-CHDs nach ISO extrahieren.
+- Metadaten untersuchen und bestehende CHDs ohne Änderungen prüfen.
+- Arbeiten in einer dauerhaften seriellen Warteschlange pausieren, abbrechen und wiederholen; die
+  letzten 100 Verlaufseinträge bleiben gespeichert.
+- Die vollständige Oberfläche auf Deutsch oder Englisch mit hellem und dunklem Design sowie
+  reduzierten Bewegungen verwenden.
 
-Installiere die [Voraussetzungen für Tauri 2](https://v2.tauri.app/start/prerequisites/) unter Linux sowie Rust, Node.js 22 und pnpm 11. Danach kann Hunk so gestartet werden:
+## Sicherheit und Datenschutz
+
+Hunk löscht oder verändert Quellabbilder niemals und überschreibt keine bestehende Ausgabe.
+Verändernde Jobs schreiben eine eindeutig benannte temporäre Datei auf das Ziellaufwerk, prüfen neu
+erstellte CHDs und veröffentlichen erst nach Erfolg und ohne Ersetzen. Hunk enthält keine Telemetrie
+und benötigt zur Laufzeit keinen Netzwerkzugriff. Job-Verlauf und Einstellungen bleiben in einer
+lokalen SQLite-Datenbank, die ausschließlich dem Backend gehört.
+
+Das Flatpak benötigt Zugriff auf das Host-Dateisystem, damit Deskriptoren benachbarte Trackdateien
+auflösen und Ausgaben neben beliebigen Quellen schreiben können. Der Webview erhält trotzdem weder
+Shell- noch allgemeinen Dateisystemzugriff. Die vollständige Grenze beschreiben die
+[Architektur](docs/ARCHITECTURE.md) und der
+[Linux-Paketierungsleitfaden](docs/LINUX_PACKAGING.md).
+
+## Unterstützte Arbeitsabläufe
+
+| Eingabe          | Verfügbare Aktionen                                       | Standardausgabe                     |
+| ---------------- | --------------------------------------------------------- | ----------------------------------- |
+| CUE/BIN oder GDI | CD-CHD erstellen                                          | CHD neben dem Deskriptor            |
+| ISO              | Nach ausdrücklicher Medienwahl CD- oder DVD-CHD erstellen | CHD neben der ISO                   |
+| CD-CHD           | CUE/BIN extrahieren, untersuchen oder prüfen              | Eine BIN und eine CUE neben dem CHD |
+| DVD-CHD          | ISO extrahieren, untersuchen oder prüfen                  | ISO neben dem CHD                   |
+
+Die CD-Extraktion kann optional eine BIN pro Track erzeugen. Parent-/Delta-Abbilder, beschreibbare
+CHDs, Metadatenänderungen, `verify --fix` und automatisches Aufräumen der Quellen sind in 0.1 bewusst
+nicht enthalten.
+
+## Pakete installieren
+
+Lade AppImage oder Flatpak, `SHA256SUMS` und `mame-mame0289-source.tar.gz` aus derselben
+Veröffentlichung herunter. Das MAME-Quellarchiv muss bei einer Weitergabe bei den Paketen bleiben.
+Prüfe die Downloads in ihrem Verzeichnis:
 
 ```sh
-pnpm install
+sha256sum --check SHA256SUMS
+```
+
+AppImage starten:
+
+```sh
+chmod +x Hunk_0.1.0_amd64.AppImage
+./Hunk_0.1.0_amd64.AppImage
+```
+
+Oder das Flatpak-Bundle für den aktuellen Benutzer installieren:
+
+```sh
+flatpak --user install Hunk_x86_64.flatpak
+flatpak run app.hunk.Hunk
+```
+
+Die AppImage-Basis ist Ubuntu 22.04. Das Flatpak verwendet GNOME-Runtime 50 und kann diese bei der
+Installation herunterladen.
+
+## Schnelleinstieg für die Entwicklung
+
+Installiere die [Voraussetzungen für Tauri 2](https://v2.tauri.app/start/prerequisites/) unter Linux,
+Rust 1.88 oder neuer, Node.js 22 und pnpm 11. Danach:
+
+```sh
+pnpm install --frozen-lockfile
 pnpm tauri dev
 ```
 
-Wichtige Prüfungen:
+Der eingecheckte Quellcode enthält kein `chdman`. Baue vor Tests echter Konvertierungen das gepinnte
+MAME-0.289-Sidecar:
 
 ```sh
-pnpm format:check
-pnpm check
-pnpm build
-cargo fmt --manifest-path src-tauri/Cargo.toml --check
-cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-cargo test --manifest-path src-tauri/Cargo.toml
+./scripts/build-chdman.sh
 ```
 
-Disc-Abbilder, Inhalte des lokalen `Test/`-Verzeichnisses, erzeugte `chdman`-Binärdateien, Pakete, Anwendungsdaten und Zugangsdaten dürfen nie in das Repository aufgenommen werden. Die vollständigen Arbeitsregeln stehen in [AGENTS.md](AGENTS.md).
+Der [Entwicklungsleitfaden](docs/DEVELOPMENT.md) beschreibt Systempakete, Teststufen, generierte
+Fixtures und die Paketierung. Disc-Abbilder, lokale `Test/`-Daten, Binärdateien, Pakete,
+Anwendungszustand und Zugangsdaten dürfen nie in das Repository aufgenommen werden.
 
-### Ende-zu-Ende-Validierung
+## Projektdokumentation
 
-Die regulären Rust-Tests erzeugen kleine deterministische CD-/DVD-Fixtures in temporären
-Verzeichnissen und decken mit einem steuerbaren Sidecar-Testprozess erfolgreiche Roundtrips und
-Sicherheitsfehler ab. Der optionale Test mit dem echten Sidecar ist in
-[docs/CHDMAN.md](docs/CHDMAN.md) beschrieben.
+- [Architektur und Vertrauensgrenzen](docs/ARCHITECTURE.md)
+- [Entwicklung und Tests](docs/DEVELOPMENT.md)
+- [Freigegebenes `chdman`-Sidecar](docs/CHDMAN.md)
+- [Linux-Paketierung](docs/LINUX_PACKAGING.md)
+- [Abhängigkeits- und Lizenzaudit](docs/DEPENDENCIES.md)
+- [Veröffentlichungsprozess](docs/RELEASING.md)
+- [Implementierungsspezifikation](docs/IMPLEMENTATION_PLAN.md)
+- [Roadmap](ROADMAP.md)
 
-Nach dem Bau des freigegebenen Sidecars können die ignorierten lokalen Daten in `Test/` ausdrücklich
-geprüft werden:
-
-```sh
-./scripts/test-local-media.sh
-```
-
-Der Harness erwartet genau die drei im Implementierungsplan beschriebenen repräsentativen
-Quellsätze, schreibt sämtliche Ausgaben in temporären Speicher und bestätigt, dass alle Quelldateien
-unverändert bleiben.
-
-### Linux-Pakete
-
-Der manuell gestartete Paketierungs-Workflow und das lokale Paketierungsskript erzeugen x86_64-
-AppImage- und Flatpak-Artefakte, ohne eine Veröffentlichung anzulegen:
-
-```sh
-./scripts/build-linux-packages.sh
-```
-
-Der Artefaktsatz enthält Prüfsummen, das exakt für `chdman` verwendete MAME-Quellarchiv und die
-zugehörigen Lizenztexte. Build-Abhängigkeiten, Flatpak-Portalverhalten, Einschränkungen bei Drag-and-
-drop und Smoke-Test-Anweisungen beschreibt der [Linux-Paketierungsleitfaden](docs/LINUX_PACKAGING.md).
+Beiträge sind willkommen; lies vor einem Pull Request [CONTRIBUTING.md](CONTRIBUTING.md). Melde
+Sicherheitslücken privat nach [SECURITY.md](SECURITY.md).
 
 ## Lizenz
 
-Hunk ist freie Software unter der [GNU General Public License, Version 3 oder neuer](LICENSE).
+Hunk ist freie Software unter der [GNU General Public License, Version 3 oder neuer](LICENSE). Das
+gebündelte MAME-`chdman`-Sidecar und andere Abhängigkeiten behalten ihre eigenen Lizenzen und
+Hinweise; siehe [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
