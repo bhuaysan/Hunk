@@ -30,7 +30,7 @@ SDK. The manifest disables a separate debug extension because the copied release
 already stripped. Install the builder, Flatpak runtime, and SDK:
 
 ```sh
-flatpak install flathub org.flatpak.Builder org.gnome.Platform//50 org.gnome.Sdk//50
+flatpak install --user flathub org.flatpak.Builder org.gnome.Platform//50 org.gnome.Sdk//50
 ```
 
 Then run:

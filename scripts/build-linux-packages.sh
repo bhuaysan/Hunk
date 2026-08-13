@@ -26,9 +26,10 @@ for required_tool in dpkg-deb file find flatpak grep pnpm sed sha256sum tar unam
     fi
 done
 
-if flatpak info org.flatpak.Builder >/dev/null 2>&1; then
+if flatpak --user info org.flatpak.Builder >/dev/null 2>&1; then
     flatpak_builder=(
         flatpak run
+        --user
         "--filesystem=${REPOSITORY_DIRECTORY}"
         org.flatpak.Builder
     )

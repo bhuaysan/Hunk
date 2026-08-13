@@ -36,9 +36,9 @@ jobs:
             xvfb
       - name: Install Flatpak builder and pinned runtime/SDK
         run: |
-          sudo flatpak remote-add --if-not-exists flathub \
+          flatpak remote-add --user --if-not-exists flathub \
             https://dl.flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install --noninteractive --or-update flathub \
+          flatpak install --user --noninteractive --or-update flathub \
             org.flatpak.Builder org.gnome.Platform//50 org.gnome.Sdk//50
       - uses: pnpm/action-setup@v4
         with:
