@@ -33,6 +33,10 @@ already stripped. Install the builder, Flatpak runtime, and SDK:
 flatpak install --user flathub org.flatpak.Builder org.gnome.Platform//50 org.gnome.Sdk//50
 ```
 
+Keep these components in Flatpak's default user installation. The packaging script exposes that
+installation read-only to the sandboxed builder so the pinned SDK remains discoverable on older
+Flatpak hosts such as Ubuntu 22.04.
+
 Then run:
 
 ```sh
