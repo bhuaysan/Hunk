@@ -27,10 +27,6 @@ for required_tool in dpkg-deb file find flatpak grep pnpm sed sha256sum tar unam
 done
 
 if command -v flatpak-builder >/dev/null 2>&1; then
-    if ! command -v eu-strip >/dev/null 2>&1; then
-        printf 'Native flatpak-builder requires eu-strip from elfutils.\n' >&2
-        exit 1
-    fi
     flatpak_builder=(flatpak-builder)
 elif flatpak info org.flatpak.Builder >/dev/null 2>&1; then
     flatpak_builder=(

@@ -3,6 +3,8 @@ runtime: org.gnome.Platform
 runtime-version: '50'
 sdk: org.gnome.Sdk
 command: hunk
+build-options:
+  no-debuginfo: true
 
 finish-args:
   - --share=ipc
