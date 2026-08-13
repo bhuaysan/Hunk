@@ -97,14 +97,31 @@ trap cleanup EXIT
 
 "${SCRIPT_DIRECTORY}/check-linux-packaging.sh"
 mkdir --parents -- "${REPOSITORY_DIRECTORY}/src-tauri/target/ccache"
-CCACHE_DIR="${REPOSITORY_DIRECTORY}/src-tauri/target/ccache" \
-    APPIMAGE_EXTRACT_AND_RUN=1 \
-    LDAI_NO_APPSTREAM=1 \
-    NO_STRIP=1 \
-    XDG_CACHE_HOME="${REPOSITORY_DIRECTORY}/src-tauri/target/xdg-cache" \
-    pnpm --dir "${REPOSITORY_DIRECTORY}" tauri build \
-        --config "${REPOSITORY_DIRECTORY}/src-tauri/tauri.bundle.conf.json" \
-        --bundles appimage,deb
+package_build_succeeded=false
+for attempt in 1 2 3; do
+    if CCACHE_DIR="${REPOSITORY_DIRECTORY}/src-tauri/target/ccache" \
+        APPIMAGE_EXTRACT_AND_RUN=1 \
+        LDAI_NO_APPSTREAM=1 \
+        NO_STRIP=1 \
+        XDG_CACHE_HOME="${REPOSITORY_DIRECTORY}/src-tauri/target/xdg-cache" \
+        pnpm --dir "${REPOSITORY_DIRECTORY}" tauri build \
+            --config "${REPOSITORY_DIRECTORY}/src-tauri/tauri.bundle.conf.json" \
+            --bundles appimage,deb; then
+        package_build_succeeded=true
+        break
+    fi
+
+    if find "${APPIMAGE_DIRECTORY}" "${DEB_DIRECTORY}" -maxdepth 1 -type f \
+        \( -name '*.AppImage' -o -name '*.deb' \) -print -quit 2>/dev/null | grep -q .; then
+        printf 'Packaging failed after creating a final package; refusing to retry.\n' >&2
+        exit 1
+    fi
+    printf 'Packaging attempt %s failed before producing a package; retrying.\n' "${attempt}" >&2
+done
+if [[ "${package_build_succeeded}" != true ]]; then
+    printf 'Packaging failed after three attempts.\n' >&2
+    exit 1
+fi
 
 mapfile -t deb_packages < <(find "${DEB_DIRECTORY}" -maxdepth 1 -type f -name '*.deb' -print)
 if [[ ${#deb_packages[@]} -ne 1 ]]; then
