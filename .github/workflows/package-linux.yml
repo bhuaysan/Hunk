@@ -22,12 +22,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes \
             appstream \
-            appstream-util \
             build-essential \
             desktop-file-utils \
             file \
             flatpak \
-            flatpak-builder \
             libayatana-appindicator3-dev \
             libfuse2 \
             librsvg2-dev \
@@ -36,12 +34,12 @@ jobs:
             patchelf \
             python3 \
             xvfb
-      - name: Install pinned Flatpak runtime and SDK
+      - name: Install Flatpak builder and pinned runtime/SDK
         run: |
           sudo flatpak remote-add --if-not-exists flathub \
             https://dl.flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install --noninteractive --or-update flathub \
-            org.gnome.Platform//50 org.gnome.Sdk//50
+            org.flatpak.Builder org.gnome.Platform//50 org.gnome.Sdk//50
       - uses: pnpm/action-setup@v4
         with:
           version: 11.9.0

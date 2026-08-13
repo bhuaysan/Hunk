@@ -18,8 +18,8 @@ sudo apt-get install build-essential libayatana-appindicator3-dev \
 ```
 
 Packaging additionally needs `appstreamcli`, `desktop-file-validate`, `dpkg-deb`, `file`, Flatpak,
-and either `flatpak-builder` plus the `appstream-compose` executable (provided by Ubuntu's
-`appstream-util` package) or the sandboxed `org.flatpak.Builder`.
+and preferably the sandboxed `org.flatpak.Builder`. A distribution-provided `flatpak-builder` is a
+fallback when it is compatible with the selected SDK.
 
 ## Setup and launch
 

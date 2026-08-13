@@ -24,13 +24,13 @@ disabled while the canonical metadata is validated explicitly before every packa
 ## Local package build
 
 Install the normal development requirements plus `appstreamcli`, `desktop-file-validate`, `dpkg-deb`,
-`file`, and `flatpak`. Use either your distribution's `flatpak-builder` plus the
-`appstream-compose` executable (provided by Ubuntu's `appstream-util` package), or the sandboxed
-`org.flatpak.Builder` tool. The manifest disables a separate debug extension because the copied
-release binaries are already stripped. Install the Flatpak runtime and SDK:
+`file`, and `flatpak`. The canonical build uses the sandboxed `org.flatpak.Builder`; a
+distribution-provided `flatpak-builder` is a fallback only when it is compatible with the selected
+SDK. The manifest disables a separate debug extension because the copied release binaries are
+already stripped. Install the builder, Flatpak runtime, and SDK:
 
 ```sh
-flatpak install flathub org.gnome.Platform//50 org.gnome.Sdk//50
+flatpak install flathub org.flatpak.Builder org.gnome.Platform//50 org.gnome.Sdk//50
 ```
 
 Then run:

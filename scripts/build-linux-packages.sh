@@ -26,20 +26,16 @@ for required_tool in dpkg-deb file find flatpak grep pnpm sed sha256sum tar unam
     fi
 done
 
-if command -v flatpak-builder >/dev/null 2>&1; then
-    if ! command -v appstream-compose >/dev/null 2>&1; then
-        printf 'Native flatpak-builder requires appstream-compose.\n' >&2
-        exit 1
-    fi
-    flatpak_builder=(flatpak-builder)
-elif flatpak info org.flatpak.Builder >/dev/null 2>&1; then
+if flatpak info org.flatpak.Builder >/dev/null 2>&1; then
     flatpak_builder=(
         flatpak run
         "--filesystem=${REPOSITORY_DIRECTORY}"
         org.flatpak.Builder
     )
+elif command -v flatpak-builder >/dev/null 2>&1; then
+    flatpak_builder=(flatpak-builder)
 else
-    printf 'flatpak-builder or the org.flatpak.Builder Flatpak is required.\n' >&2
+    printf 'The org.flatpak.Builder Flatpak or a compatible flatpak-builder is required.\n' >&2
     exit 1
 fi
 
