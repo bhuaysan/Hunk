@@ -19,7 +19,7 @@ The script builds only the approved `chdman` target and writes the untracked Tau
 To run the opt-in integration check against the resulting executable:
 
 ```sh
-HUNK_CHDMAN=src-tauri/binaries/chdman-x86_64-unknown-linux-gnu \
+HUNK_CHDMAN="$PWD/src-tauri/binaries/chdman-x86_64-unknown-linux-gnu" \
   cargo test --manifest-path src-tauri/Cargo.toml \
   --test chdman_process approved_real_binary_reports_required_capabilities -- --ignored
 ```
@@ -28,7 +28,7 @@ To generate tiny redistributable CD/DVD fixtures at test time and exercise creat
 extract, and recreate round trips through the full job engine:
 
 ```sh
-HUNK_CHDMAN=src-tauri/binaries/chdman-x86_64-unknown-linux-gnu \
+HUNK_CHDMAN="$PWD/src-tauri/binaries/chdman-x86_64-unknown-linux-gnu" \
   cargo test --manifest-path src-tauri/Cargo.toml \
   --test end_to_end generated_fixture_round_trip_with_real_chdman -- --ignored --exact
 ```

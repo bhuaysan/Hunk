@@ -54,7 +54,7 @@ configuration_arguments=(
 )
 readonly PROJECT_DIRECTORY="${SOURCE_DIRECTORY}/build/projects/sdl/mame/gmake-linux"
 make --directory "${SOURCE_DIRECTORY}" "${configuration_arguments[@]}" \
-    build/projects/sdl/mame/gmake-linux/Makefile
+    build/generated/version.cpp build/projects/sdl/mame/gmake-linux/Makefile
 make --directory "${PROJECT_DIRECTORY}" config=release "-j${BUILD_JOBS}" chdman
 
 mkdir --parents -- "${OUTPUT_DIRECTORY}"
