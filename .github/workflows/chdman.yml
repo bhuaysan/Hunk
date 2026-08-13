@@ -17,7 +17,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends --yes \
             build-essential \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
             libsdl2-dev \
+            libwebkit2gtk-4.1-dev \
             python3
       - name: Build pinned chdman
         env:
