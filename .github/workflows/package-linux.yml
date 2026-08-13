@@ -24,6 +24,7 @@ jobs:
             appstream \
             build-essential \
             desktop-file-utils \
+            elfutils \
             file \
             flatpak \
             flatpak-builder \
