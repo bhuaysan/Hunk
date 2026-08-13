@@ -1,6 +1,9 @@
 <script lang="ts">
+  import { t, type Locale } from '../i18n';
+
   export let importing = false;
   export let hovering = false;
+  export let locale: Locale;
   export let onFiles: () => void;
   export let onFolder: () => void;
 </script>
@@ -8,21 +11,19 @@
 <section class:hovering class="import-surface" aria-labelledby="import-title" aria-busy={importing}>
   <div class="disc-glyph" aria-hidden="true"><span></span></div>
   <div class="import-copy">
-    <p class="section-label">Bring in optical media</p>
-    <h2 id="import-title">Drop a disc set here.</h2>
-    <p>
-      CUE, GDI, ISO, and CHD stay on this computer. Referenced tracks are grouped automatically.
-    </p>
+    <p class="section-label">{t(locale, 'bringInMedia')}</p>
+    <h2 id="import-title">{t(locale, 'dropDiscSet')}</h2>
+    <p>{t(locale, 'importExplanation')}</p>
   </div>
   <div class="import-actions">
     <button class="primary" type="button" onclick={onFiles} disabled={importing}>
-      {importing ? 'Inspecting…' : 'Choose images'}
+      {importing ? t(locale, 'inspecting') : t(locale, 'chooseImages')}
     </button>
     <button class="secondary" type="button" onclick={onFolder} disabled={importing}
-      >Choose folder</button
+      >{t(locale, 'chooseFolder')}</button
     >
   </div>
-  {#if hovering}<div class="drop-message">Release to inspect</div>{/if}
+  {#if hovering}<div class="drop-message" role="status">{t(locale, 'releaseToInspect')}</div>{/if}
 </section>
 
 <style>

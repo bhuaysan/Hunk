@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light dark;
   font-family: Inter, 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
   color: #17242b;
   background: #f4f7f6;
@@ -15,6 +16,11 @@
   --rail: #17242b;
   --danger: #b9564e;
   --danger-text: #843b36;
+  --danger-fill: #b9564e;
+  --interactive: #356f9c;
+  --success-text: #247268;
+  --warning-text: #8a5b18;
+  --focus-ring: #9a651a;
   --display: 'Barlow Semi Condensed', 'Arial Narrow', Inter, sans-serif;
   --body: Inter, 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
   --mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, ui-monospace, monospace;
@@ -23,6 +29,17 @@
 
 * {
   box-sizing: border-box;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 html,
@@ -39,14 +56,16 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 summary:focus-visible {
-  outline: 3px solid var(--audio-amber);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -86,9 +105,9 @@ input {
 }
 
 .primary {
-  border: 1px solid var(--disc-blue);
+  border: 1px solid var(--interactive);
   color: #fff;
-  background: var(--disc-blue);
+  background: var(--interactive);
   box-shadow: 0 5px 14px rgb(63 124 172 / 17%);
 }
 
@@ -138,6 +157,26 @@ input {
 .rail nav {
   display: grid;
   gap: 7px;
+}
+
+.language-control {
+  display: grid;
+  gap: 6px;
+  color: rgb(244 247 246 / 70%);
+  font: 600 8px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.language-control select {
+  width: 100%;
+  min-height: 34px;
+  padding: 0 8px;
+  border: 1px solid rgb(244 247 246 / 25%);
+  border-radius: 5px;
+  color: #f4f7f6;
+  background: #22343d;
+  cursor: pointer;
 }
 
 .rail nav button {
@@ -196,7 +235,7 @@ input {
 }
 
 .version {
-  color: rgb(244 247 246 / 35%);
+  color: rgb(244 247 246 / 58%);
   font: 8px var(--mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -311,7 +350,7 @@ main {
 }
 
 .notice > span {
-  color: var(--oxide-teal);
+  color: var(--success-text);
   font: 700 12px var(--mono);
 }
 
@@ -347,17 +386,6 @@ main {
   display: none;
 }
 
-.modal-backdrop {
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 22px;
-  background: rgb(8 17 22 / 58%);
-  backdrop-filter: blur(3px);
-}
-
 .close-dialog {
   width: min(430px, 100%);
   padding: 25px;
@@ -366,6 +394,11 @@ main {
   color: var(--basalt);
   background: var(--surface);
   box-shadow: 0 24px 70px rgb(8 17 22 / 30%);
+}
+
+.close-dialog::backdrop {
+  background: rgb(8 17 22 / 58%);
+  backdrop-filter: blur(3px);
 }
 
 .close-dialog h2 {
@@ -390,10 +423,10 @@ main {
 .danger-button {
   min-height: 38px;
   padding: 0 14px;
-  border: 1px solid var(--danger);
+  border: 1px solid var(--danger-fill);
   border-radius: 6px;
   color: #fff;
-  background: var(--danger);
+  background: var(--danger-fill);
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -411,9 +444,15 @@ main {
     --rail: #0b1317;
     --danger: #e07a71;
     --danger-text: #f1aaa4;
+    --danger-fill: #9d4842;
+    --interactive: #79b2df;
+    --success-text: #67b5a9;
+    --warning-text: #f1bd68;
+    --focus-ring: #f1bd68;
   }
   .primary {
     color: #fff;
+    background: #356f9c;
   }
 }
 
@@ -428,7 +467,8 @@ main {
   .brand span,
   .rail nav button span,
   .rail-status small,
-  .version {
+  .version,
+  .language-control > span {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -440,6 +480,10 @@ main {
     justify-content: center;
     width: 44px;
     padding: 0;
+  }
+  .language-control select {
+    width: 44px;
+    padding-inline: 5px;
   }
   .workbench-grid {
     grid-template-columns: minmax(230px, 0.85fr) minmax(390px, 1.4fr);
@@ -491,7 +535,7 @@ main {
     padding: 0 18px;
     border: 0;
     border-bottom: 1px solid var(--alloy);
-    color: var(--disc-blue);
+    color: var(--interactive);
     text-align: right;
     background: var(--surface);
     font-size: 10px;
@@ -520,7 +564,7 @@ main {
     display: grid;
     width: 100%;
     height: 62px;
-    grid-template-columns: 42px 1fr;
+    grid-template-columns: 42px 1fr 48px;
     padding: 8px 14px;
     box-shadow: 0 -6px 20px rgb(8 17 22 / 15%);
   }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import hunkMark from '../assets/hunk-mark.svg';
   import HistoryView from './lib/components/HistoryView.svelte';
   import ImportSurface from './lib/components/ImportSurface.svelte';
@@ -24,6 +24,7 @@
     setQueuePaused,
     updateSettings,
   } from './lib/backend';
+  import { detectLocale, t, type Locale } from './lib/i18n';
   import { basename, defaultDestination, dirname, operationsFor } from './lib/presentation';
   import type {
     AdvancedOptions,
@@ -46,18 +47,30 @@
   let hovering = false;
   let inspectorOpen = false;
   let closeConfirmation = false;
+  let narrowInspector = false;
+  let detailsButton: HTMLButtonElement;
+  let drawerClose: HTMLButtonElement;
   let notice: { tone: 'error' | 'info'; text: string } | null = null;
   let queue: QueueSnapshot = { paused: false, activeJobId: null, jobs: [] };
   let history: JobRecord[] = [];
-  let settings: Settings = { destinationDirectory: null };
+  let locale: Locale = detectLocale();
+  let settings: Settings = { destinationDirectory: null, locale: null };
   let advanced: AdvancedOptions = { splitBin: false, processors: null, hunkSize: null };
 
   $: selected = sources[selectedIndex];
   $: selectedMedia = selected ? isoChoices[selected.primaryFile] : undefined;
   $: operations = selected ? operationsFor(selected, selectedMedia) : [];
+  $: if (typeof document !== 'undefined') {
+    document.documentElement.lang = locale;
+    document.title = t(locale, 'appTitle');
+  }
 
   onMount(() => {
     const disposers: Array<() => void> = [];
+    const narrowQuery = window.matchMedia('(max-width: 720px)');
+    const updateNarrowInspector = () => (narrowInspector = narrowQuery.matches);
+    updateNarrowInspector();
+    narrowQuery.addEventListener('change', updateNarrowInspector);
     Promise.all([
       listenForDroppedPaths(
         (active) => (hovering = active),
@@ -83,11 +96,15 @@
           queue = queueState;
           history = records;
           settings = preferences;
+          locale = preferences.locale ?? locale;
           records.forEach(applyChdInfo);
         })
         .catch((error: unknown) => showError(error));
     }
-    return () => disposers.forEach((dispose) => dispose());
+    return () => {
+      narrowQuery.removeEventListener('change', updateNarrowInspector);
+      disposers.forEach((dispose) => dispose());
+    };
   });
 
   function handleJobChanged(record: JobRecord) {
@@ -131,13 +148,14 @@
     const first = issues[0];
     const reason =
       first.kind === 'unsupportedInput'
-        ? 'is not a supported CUE, GDI, ISO, or CHD source'
+        ? t(locale, 'unsupportedInput')
         : first.kind === 'inputUnreadable'
-          ? 'cannot be read'
-          : 'could not be found';
+          ? t(locale, 'inputUnreadable')
+          : t(locale, 'inputNotFound');
+    const additional = issues.length - 1;
     notice = {
       tone: 'error',
-      text: `${basename(first.path)} ${reason}${issues.length > 1 ? `, plus ${issues.length - 1} more issue${issues.length === 2 ? '' : 's'}.` : '.'}`,
+      text: `${basename(first.path)} ${reason}${additional > 0 ? t(locale, additional === 1 ? 'moreIssue' : 'moreIssues', { count: additional }) : '.'}`,
     };
   }
 
@@ -155,10 +173,12 @@
           (source) => source.primaryFile === report.sourceSets[0].primaryFile,
         );
         resetWorkflow();
-        inspectorOpen = true;
+        await showInspector(narrowInspector);
         notice = {
           tone: 'info',
-          text: `${report.sourceSets.length} source set${report.sourceSets.length === 1 ? '' : 's'} inspected.`,
+          text: t(locale, report.sourceSets.length === 1 ? 'sourceInspected' : 'sourcesInspected', {
+            count: report.sourceSets.length,
+          }),
         };
       }
       reportIssues(report.issues);
@@ -171,7 +191,7 @@
 
   async function openPicker(directory: boolean) {
     try {
-      await importPaths(await chooseSources(directory));
+      await importPaths(await chooseSources(directory, locale));
     } catch (error) {
       showError(error);
     }
@@ -186,13 +206,54 @@
   function selectSource(index: number) {
     selectedIndex = index;
     resetWorkflow();
-    inspectorOpen = true;
+    void showInspector(narrowInspector);
   }
 
   function removeSource(index: number) {
     sources = sources.filter((_, itemIndex) => itemIndex !== index);
     selectedIndex = Math.min(selectedIndex, Math.max(0, sources.length - 1));
     resetWorkflow();
+  }
+
+  async function showInspector(moveFocus = true) {
+    inspectorOpen = true;
+    if (moveFocus && narrowInspector) {
+      await tick();
+      drawerClose?.focus();
+    }
+  }
+
+  async function hideInspector(restoreFocus = true) {
+    inspectorOpen = false;
+    if (restoreFocus && narrowInspector) {
+      await tick();
+      detailsButton?.focus();
+    }
+  }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && narrowInspector && inspectorOpen) {
+      event.preventDefault();
+      void hideInspector();
+    }
+  }
+
+  function openModal(node: HTMLDialogElement) {
+    node.showModal();
+    requestAnimationFrame(() => node.querySelector<HTMLElement>('[data-autofocus]')?.focus());
+    return { destroy: () => node.close() };
+  }
+
+  async function changeLocale(next: Locale) {
+    locale = next;
+    notice = null;
+    settings = { ...settings, locale: next };
+    if (!isDesktop()) return;
+    try {
+      settings = await updateSettings(settings);
+    } catch (error) {
+      showError(error);
+    }
   }
 
   function selectMedia(kind: MediaKind) {
@@ -212,6 +273,7 @@
     if (!selected || !operation) return;
     try {
       const folder = await chooseDestination(
+        locale,
         destination
           ? dirname(destination)
           : (settings.destinationDirectory ?? dirname(selected.primaryFile)),
@@ -220,7 +282,7 @@
       const fileName = basename(defaultDestination(selected, operation, advanced.splitBin) ?? '');
       const separator = folder.includes('\\') && !folder.includes('/') ? '\\' : '/';
       destination = `${folder.replace(/[\\/]$/, '')}${separator}${fileName}`;
-      settings = await updateSettings({ destinationDirectory: folder });
+      settings = await updateSettings({ ...settings, destinationDirectory: folder });
     } catch (error) {
       showError(error);
     }
@@ -236,7 +298,7 @@
     if (collision) {
       notice = {
         tone: 'error',
-        text: 'Another queued job already uses this destination. Choose a different name or folder.',
+        text: t(locale, 'destinationConflict'),
       };
       return;
     }
@@ -248,7 +310,10 @@
         options: advanced,
       });
       queue = await getQueue();
-      notice = { tone: 'info', text: `${basename(selected.primaryFile)} was added to the queue.` };
+      notice = {
+        tone: 'info',
+        text: t(locale, 'addedToQueue', { name: basename(selected.primaryFile) }),
+      };
     } catch (error) {
       showError(error);
     }
@@ -292,14 +357,19 @@
   }
 </script>
 
-<svelte:head><title>Hunk — Optical workbench</title></svelte:head>
+<svelte:head><title>{t(locale, 'appTitle')}</title></svelte:head>
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="app-shell">
-  <aside class="rail" aria-label="Primary navigation">
+  <aside
+    class="rail"
+    aria-label={t(locale, 'primaryNavigation')}
+    inert={narrowInspector && inspectorOpen}
+  >
     <div class="brand" aria-label="Hunk">
       <img src={hunkMark} alt="" /><span>Hunk</span>
     </div>
-    <nav aria-label="Workspace">
+    <nav aria-label={t(locale, 'workspaceNavigation')}>
       <button
         type="button"
         class:active={view === 'workbench'}
@@ -307,7 +377,7 @@
         onclick={() => (view = 'workbench')}
       >
         <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5" /></svg>
-        <span>Workbench</span>
+        <span>{t(locale, 'workbench')}</span>
       </button>
       <button
         type="button"
@@ -318,17 +388,29 @@
         <svg aria-hidden="true" viewBox="0 0 24 24"
           ><path d="M5 4v16h14V4M8 8h8M8 12h8M8 16h5" /></svg
         >
-        <span>History</span>
+        <span>{t(locale, 'history')}</span>
       </button>
     </nav>
-    <div class="rail-status"><span></span><small>Local only</small></div>
-    <span class="version">Workbench · 0.0.0</span>
+    <label class="language-control">
+      <span>{t(locale, 'language')}</span>
+      <select
+        value={locale}
+        aria-label={t(locale, 'language')}
+        onchange={(event) => void changeLocale(event.currentTarget.value as Locale)}
+      >
+        <option value="en">EN</option>
+        <option value="de">DE</option>
+      </select>
+    </label>
+    <div class="rail-status"><span></span><small>{t(locale, 'localOnly')}</small></div>
+    <span class="version">{t(locale, 'workbench')} · 0.0.0</span>
   </aside>
 
   <main>
     {#if view === 'history'}
       <HistoryView
         items={history}
+        {locale}
         onWorkbench={() => (view = 'workbench')}
         onRetry={(id) => void retryRecord(id)}
         onRemove={(id) => void removeRecord(id)}
@@ -337,44 +419,50 @@
       <div class="empty-workbench">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Local optical media tools</p>
-            <h1>Workbench</h1>
+            <p class="eyebrow">{t(locale, 'localOpticalTools')}</p>
+            <h1>{t(locale, 'workbench')}</h1>
           </div>
-          <span class="app-status"><span></span> Ready</span>
+          <span class="app-status"><span></span> {t(locale, 'ready')}</span>
         </header>
         <ImportSurface
           {importing}
           {hovering}
+          {locale}
           onFiles={() => void openPicker(false)}
           onFolder={() => void openPicker(true)}
         />
         <footer>
           <span></span>
-          <p>Sources stay untouched. Hunk never uploads media or overwrites output.</p>
+          <p>{t(locale, 'sourcesSafety')}</p>
         </footer>
       </div>
     {:else}
       <div class="workbench-view">
-        <header class="workbench-bar">
+        <header class="workbench-bar" inert={narrowInspector && inspectorOpen}>
           <div>
-            <p class="eyebrow">Local optical media tools</p>
-            <h1>Workbench</h1>
+            <p class="eyebrow">{t(locale, 'localOpticalTools')}</p>
+            <h1>{t(locale, 'workbench')}</h1>
           </div>
           <div class="toolbar">
             <button
               class="secondary"
               type="button"
               onclick={() => void openPicker(false)}
-              disabled={importing}>＋ Images</button
+              disabled={importing}>＋ {t(locale, 'images')}</button
             >
             <button
               class="secondary"
               type="button"
               onclick={() => void openPicker(true)}
-              disabled={importing}>＋ Folder</button
+              disabled={importing}>＋ {t(locale, 'folder')}</button
             >
-            <button class="details-toggle" type="button" onclick={() => (inspectorOpen = true)}
-              >Source details</button
+            <button
+              bind:this={detailsButton}
+              class="details-toggle"
+              type="button"
+              aria-expanded={inspectorOpen}
+              aria-controls="source-inspector"
+              onclick={() => void showInspector()}>{t(locale, 'sourceDetails')}</button
             >
           </div>
         </header>
@@ -384,11 +472,14 @@
             class:error={notice.tone === 'error'}
             class="notice"
             role={notice.tone === 'error' ? 'alert' : 'status'}
+            inert={narrowInspector && inspectorOpen}
           >
             <span>{notice.tone === 'error' ? '!' : '✓'}</span>
             <p>{notice.text}</p>
-            <button type="button" aria-label="Dismiss message" onclick={() => (notice = null)}
-              >×</button
+            <button
+              type="button"
+              aria-label={t(locale, 'dismissMessage')}
+              onclick={() => (notice = null)}>×</button
             >
           </div>
         {/if}
@@ -397,16 +488,31 @@
           <SourceList
             {sources}
             selected={selectedIndex}
+            {locale}
+            inactive={narrowInspector && inspectorOpen}
             onSelect={selectSource}
             onRemove={removeSource}
           />
           {#if selected}
-            <div class:open={inspectorOpen} class="inspector-drawer">
-              <button class="drawer-close" type="button" onclick={() => (inspectorOpen = false)}
-                >Close details</button
+            <div
+              id="source-inspector"
+              class:open={inspectorOpen}
+              class="inspector-drawer"
+              inert={narrowInspector && !inspectorOpen}
+              aria-hidden={narrowInspector && !inspectorOpen ? 'true' : undefined}
+              role={narrowInspector ? 'dialog' : undefined}
+              aria-modal={narrowInspector ? 'true' : undefined}
+              aria-labelledby={narrowInspector ? 'inspector-title' : undefined}
+            >
+              <button
+                bind:this={drawerClose}
+                class="drawer-close"
+                type="button"
+                onclick={() => void hideInspector()}>{t(locale, 'closeDetails')}</button
               >
               <Inspector
                 source={selected}
+                {locale}
                 mediaChoice={selectedMedia}
                 {operations}
                 {operation}
@@ -424,6 +530,7 @@
               <ImportSurface
                 {importing}
                 {hovering}
+                {locale}
                 onFiles={() => void openPicker(false)}
                 onFolder={() => void openPicker(true)}
               />
@@ -433,6 +540,8 @@
             items={queue.jobs}
             paused={queue.paused}
             activeJobId={queue.activeJobId}
+            {locale}
+            inactive={narrowInspector && inspectorOpen}
             onPause={(paused) => void pauseQueue(paused)}
             onCancel={(id) => void cancelRecord(id)}
             onRetry={(id) => void retryRecord(id)}
@@ -441,8 +550,9 @@
         </div>
         {#if inspectorOpen}<button
             class="drawer-backdrop"
-            aria-label="Close source details"
-            onclick={() => (inspectorOpen = false)}
+            tabindex="-1"
+            aria-label={t(locale, 'closeDetails')}
+            onclick={() => void hideInspector()}
           ></button>{/if}
       </div>
     {/if}
@@ -450,22 +560,28 @@
 </div>
 
 {#if closeConfirmation}
-  <div class="modal-backdrop" role="presentation">
-    <dialog open class="close-dialog" aria-labelledby="close-title">
-      <p class="section-label">Active job</p>
-      <h2 id="close-title">Stop processing and close Hunk?</h2>
-      <p>
-        The active chdman process will be cancelled. Source files and existing outputs stay
-        untouched.
-      </p>
-      <div>
-        <button class="secondary" type="button" onclick={() => (closeConfirmation = false)}
-          >Keep working</button
-        >
-        <button class="danger-button" type="button" onclick={() => void confirmClose()}
-          >Cancel job and close</button
-        >
-      </div>
-    </dialog>
-  </div>
+  <dialog
+    use:openModal
+    class="close-dialog"
+    aria-labelledby="close-title"
+    oncancel={(event) => {
+      event.preventDefault();
+      closeConfirmation = false;
+    }}
+  >
+    <p class="section-label">{t(locale, 'activeJob')}</p>
+    <h2 id="close-title">{t(locale, 'closeQuestion')}</h2>
+    <p>{t(locale, 'closeExplanation')}</p>
+    <div>
+      <button
+        data-autofocus
+        class="secondary"
+        type="button"
+        onclick={() => (closeConfirmation = false)}>{t(locale, 'keepWorking')}</button
+      >
+      <button class="danger-button" type="button" onclick={() => void confirmClose()}
+        >{t(locale, 'cancelAndClose')}</button
+      >
+    </div>
+  </dialog>
 {/if}

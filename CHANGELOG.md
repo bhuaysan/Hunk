@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Verified temporary CHD creation, collision-safe publication, safe cancellation cleanup, multi-file CD extraction ordering, and interrupted-job recovery after restart.
 - A responsive optical workbench with native file/folder import, drag and drop, contextual source inspection, destination and advanced conversion controls, a patterned track band, prepared queue, and history views.
 - Explicit CD/DVD selection for ISO sources, output-conflict feedback, validation guidance, and safe create, extract, verify, and information workflows connected to the durable job engine.
+- Complete English and German interfaces with a persisted language choice and locale-aware dates, numbers, sizes, native dialogs, validation guidance, queue states, and history.
+- Accessible keyboard and screen-reader behavior across navigation, the responsive source drawer, progress bands, and close confirmation, with verified light/dark contrast, visible focus, and reduced motion.
 - Safe integration for the pinned MAME 0.289 `chdman`, including capability checks and structured information, progress, verification, and error parsing.
 - Recursive CUE/BIN, GDI, ISO, and CHD source discovery with source-set de-duplication.
 - Structured validation for missing, duplicate, escaping, unreadable, and malformed track references.

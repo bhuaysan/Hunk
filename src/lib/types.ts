@@ -130,4 +130,5 @@ export interface QueueSnapshot {
 
 export interface Settings {
   destinationDirectory: string | null;
+  locale: import('./i18n').Locale | null;
 }

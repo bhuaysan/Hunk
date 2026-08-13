@@ -1,11 +1,14 @@
 <script lang="ts">
-  import { basename, operationLabel } from '../presentation';
+  import { jobStateLabel, localizeJobMessage, operationLabel, t, type Locale } from '../i18n';
+  import { basename } from '../presentation';
   import type { JobRecord } from '../types';
   import TrackBand from './TrackBand.svelte';
 
   export let items: JobRecord[] = [];
   export let paused = false;
   export let activeJobId: string | null = null;
+  export let locale: Locale;
+  export let inactive = false;
   export let onPause: (paused: boolean) => void;
   export let onCancel: (id: string) => void;
   export let onRetry: (id: string) => void;
@@ -15,28 +18,28 @@
     ['queued', 'preflight', 'running', 'verifying', 'blocked'].includes(item.state);
 </script>
 
-<aside class="queue-panel" aria-labelledby="queue-title">
+<aside class="queue-panel" aria-labelledby="queue-title" inert={inactive}>
   <header>
     <div>
-      <p class="section-label">Serial processing</p>
-      <h2 id="queue-title">Queue</h2>
+      <p class="section-label">{t(locale, 'serialProcessing')}</p>
+      <h2 id="queue-title">{t(locale, 'queue')}</h2>
     </div>
     <div class="queue-tools">
       <span>{items.length.toString().padStart(2, '0')}</span>
       <button type="button" onclick={() => onPause(!paused)} disabled={!items.length}>
-        {paused ? 'Resume' : 'Pause'}
+        {paused ? t(locale, 'resume') : t(locale, 'pause')}
       </button>
     </div>
   </header>
   {#if items.length === 0}
     <div class="queue-empty">
       <span aria-hidden="true">↳</span>
-      <strong>No queued jobs</strong>
-      <p>Choose an action for a source. Jobs run safely, one at a time.</p>
+      <strong>{t(locale, 'noQueuedJobs')}</strong>
+      <p>{t(locale, 'queueEmptyExplanation')}</p>
     </div>
   {:else}
     {#if paused}<p class="paused-note" role="status">
-        Queued work is paused. The active job may finish.
+        {t(locale, 'queuePaused')}
       </p>{/if}
     <ol>
       {#each items as item, index (item.id)}
@@ -44,27 +47,41 @@
           <div class="queue-order">{(index + 1).toString().padStart(2, '0')}</div>
           <div class="queue-copy">
             <strong>{basename(item.spec.source.primaryFile)}</strong>
-            <span>{operationLabel(item.spec.operation)} · {item.state}</span>
+            <span
+              >{operationLabel(locale, item.spec.operation)} · {jobStateLabel(
+                locale,
+                item.state,
+              )}</span
+            >
             <TrackBand
               tracks={item.spec.source.tracks}
               progress={item.progress?.percentage ?? null}
+              {locale}
               compact
             />
-            <small class:error={Boolean(item.error)}>{item.error ?? item.message}</small>
+            <small class:error={Boolean(item.error)}
+              >{item.error ?? localizeJobMessage(locale, item.message)}</small
+            >
           </div>
           <div class="item-actions">
             {#if item.state === 'blocked'}
-              <button type="button" onclick={() => onRetry(item.id)} aria-label="Retry job"
-                >↻</button
+              <button
+                type="button"
+                onclick={() => onRetry(item.id)}
+                aria-label={t(locale, 'retryJob')}>↻</button
               >
             {/if}
             {#if cancellable(item)}
-              <button type="button" onclick={() => onCancel(item.id)} aria-label="Cancel job"
-                >×</button
+              <button
+                type="button"
+                onclick={() => onCancel(item.id)}
+                aria-label={t(locale, 'cancelJob')}>×</button
               >
             {:else}
-              <button type="button" onclick={() => onRemove(item.id)} aria-label="Remove job"
-                >×</button
+              <button
+                type="button"
+                onclick={() => onRemove(item.id)}
+                aria-label={t(locale, 'removeJob')}>×</button
               >
             {/if}
           </div>
@@ -103,10 +120,12 @@
   }
   .queue-tools button,
   .item-actions button {
+    min-width: 28px;
+    min-height: 28px;
     padding: 4px 6px;
     border: 1px solid var(--alloy);
     border-radius: 4px;
-    color: var(--disc-blue);
+    color: var(--interactive);
     background: transparent;
     font-size: 9px;
     font-weight: 700;
@@ -116,7 +135,7 @@
     margin: 0;
     padding: 9px 14px;
     border-bottom: 1px solid var(--alloy);
-    color: var(--audio-amber);
+    color: var(--warning-text);
     font-size: 9px;
   }
   .queue-empty {
@@ -134,7 +153,7 @@
     margin-bottom: 12px;
     border: 1px solid var(--alloy);
     border-radius: 50%;
-    color: var(--disc-blue);
+    color: var(--interactive);
     font: 17px var(--mono);
   }
   .queue-empty strong {
@@ -182,7 +201,7 @@
     white-space: nowrap;
   }
   .queue-copy > span {
-    color: var(--disc-blue);
+    color: var(--interactive);
     font-size: 9px;
     font-weight: 650;
     text-transform: capitalize;

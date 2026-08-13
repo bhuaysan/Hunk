@@ -1,16 +1,19 @@
 <script lang="ts">
   import {
-    basename,
-    dirname,
     formatBytes,
-    formatMedia,
+    formatNumber,
+    mediaLabel,
     operationLabel,
     problemMessage,
-  } from '../presentation';
+    t,
+    type Locale,
+  } from '../i18n';
+  import { basename, dirname } from '../presentation';
   import type { AdvancedOptions, MediaKind, Operation, SourceSet } from '../types';
   import TrackBand from './TrackBand.svelte';
 
   export let source: SourceSet;
+  export let locale: Locale;
   export let mediaChoice: MediaKind | undefined;
   export let operations: Operation[] = [];
   export let operation: Operation | undefined;
@@ -32,42 +35,53 @@
 <section class="inspector" aria-labelledby="inspector-title">
   <header class="inspector-heading">
     <div>
-      <p class="section-label">Selected source</p>
+      <p class="section-label">{t(locale, 'selectedSource')}</p>
       <h2 id="inspector-title">{basename(source.primaryFile)}</h2>
     </div>
     <span class:invalid={source.validationProblems.length > 0} class="ready-pill">
-      {source.validationProblems.length ? 'Needs attention' : 'Ready'}
+      {source.validationProblems.length ? t(locale, 'needsAttention') : t(locale, 'ready')}
     </span>
   </header>
 
   <div class="disc-map">
     <div class="disc-summary">
       <span>{source.format.toUpperCase()}</span>
-      <strong>{source.tracks.length || '—'}</strong>
-      <small>{source.tracks.length === 1 ? 'track' : 'tracks'}</small>
+      <strong>{source.tracks.length ? formatNumber(locale, source.tracks.length) : '—'}</strong>
+      <small>{t(locale, source.tracks.length === 1 ? 'track' : 'tracks')}</small>
     </div>
-    <TrackBand tracks={source.tracks} />
-    <div class="legend" aria-label="Track legend">
-      <span class="data">Data</span><span class="audio">Audio</span><span class="subchannel"
-        >Subchannel</span
-      >
+    <TrackBand tracks={source.tracks} {locale} />
+    <div class="legend" aria-label={t(locale, 'trackLegend')}>
+      <span class="data">{t(locale, 'data')}</span><span class="audio">{t(locale, 'audio')}</span
+      ><span class="subchannel">{t(locale, 'subchannel')}</span>
     </div>
   </div>
 
   {#if source.validationProblems.length > 0}
     <div class="problem-box" role="alert">
-      <strong>This source cannot be queued.</strong>
+      <strong>{t(locale, 'cannotQueue')}</strong>
       {#each source.validationProblems as problem}
-        <p>{problemMessage(problem)}</p>
+        <p>{problemMessage(locale, problem)}</p>
       {/each}
     </div>
   {:else}
     <div class="facts">
-      <div><span>Media</span><strong>{formatMedia(mediaChoice ?? source.mediaKind)}</strong></div>
-      <div><span>Source size</span><strong>{formatBytes(source.totalSize)}</strong></div>
-      <div><span>Dependencies</span><strong>{source.referencedFiles.length}</strong></div>
       <div>
-        <span>Location</span><strong title={dirname(source.primaryFile)}
+        <span>{t(locale, 'media')}</span><strong
+          >{mediaLabel(locale, mediaChoice ?? source.mediaKind)}</strong
+        >
+      </div>
+      <div>
+        <span>{t(locale, 'sourceSize')}</span><strong
+          >{formatBytes(locale, source.totalSize)}</strong
+        >
+      </div>
+      <div>
+        <span>{t(locale, 'dependencies')}</span><strong
+          >{formatNumber(locale, source.referencedFiles.length)}</strong
+        >
+      </div>
+      <div>
+        <span>{t(locale, 'location')}</span><strong title={dirname(source.primaryFile)}
           >{dirname(source.primaryFile) || '—'}</strong
         >
       </div>
@@ -75,8 +89,8 @@
 
     {#if source.format === 'iso'}
       <fieldset class="media-choice">
-        <legend>What kind of disc is this ISO?</legend>
-        <p>ISO size is not a reliable media detector. Choose explicitly.</p>
+        <legend>{t(locale, 'isoQuestion')}</legend>
+        <p>{t(locale, 'isoExplanation')}</p>
         <div class="segment-control">
           <button
             type="button"
@@ -96,7 +110,7 @@
 
     {#if operations.length > 0}
       <fieldset class="operations">
-        <legend>Choose an action</legend>
+        <legend>{t(locale, 'chooseAction')}</legend>
         <div class="operation-grid">
           {#each operations as item}
             <button
@@ -114,19 +128,19 @@
                       ? '✓'
                       : 'i'}</span
               >
-              {operationLabel(item)}
+              {operationLabel(locale, item)}
             </button>
           {/each}
         </div>
       </fieldset>
     {:else if source.format === 'iso'}
-      <p class="choice-prompt">Choose CD or DVD to continue.</p>
+      <p class="choice-prompt">{t(locale, 'chooseMediaToContinue')}</p>
     {/if}
 
     {#if operation}
       {#if needsDestination}
         <div class="destination-field">
-          <label for="destination">Destination</label>
+          <label for="destination">{t(locale, 'destination')}</label>
           <div>
             <input
               id="destination"
@@ -138,40 +152,42 @@
               type="button"
               class="browse"
               onclick={onChooseDestination}
-              aria-label="Choose destination folder">…</button
+              aria-label={t(locale, 'chooseDestination')}>…</button
             >
           </div>
-          <p>Existing files are never overwritten.</p>
+          <p>{t(locale, 'neverOverwrite')}</p>
         </div>
       {/if}
 
       {#if operation.startsWith('create') || operation === 'extractCd'}
         <details class="advanced-options">
-          <summary>Advanced options</summary>
+          <summary>{t(locale, 'advancedOptions')}</summary>
           <div class="advanced-grid">
             {#if operation === 'extractCd'}
               <label class="check-row">
                 <input type="checkbox" bind:checked={advanced.splitBin} />
-                <span>Split BIN per track</span>
+                <span>{t(locale, 'splitBin')}</span>
               </label>
             {:else}
               <label>
-                <span>Processors</span>
+                <span>{t(locale, 'processors')}</span>
                 <input
                   type="number"
                   min="1"
                   max="256"
-                  placeholder="Automatic"
+                  placeholder={t(locale, 'automatic')}
+                  aria-label={t(locale, 'processors')}
                   bind:value={advanced.processors}
                 />
               </label>
               <label>
-                <span>Hunk size (bytes)</span>
+                <span>{t(locale, 'hunkSize')}</span>
                 <input
                   type="number"
                   min="1"
                   max="1048576"
-                  placeholder="chdman default"
+                  placeholder={t(locale, 'chdmanDefault')}
+                  aria-label={t(locale, 'hunkSize')}
                   bind:value={advanced.hunkSize}
                 />
               </label>
@@ -183,11 +199,11 @@
       <div class="action-footer">
         <p>
           {operation === 'verify' || operation === 'info'
-            ? 'This action reads the CHD without changing it.'
-            : 'The source stays untouched. New CHDs are verified before publication.'}
+            ? t(locale, 'readOnlyAction')
+            : t(locale, 'safeCreateAction')}
         </p>
         <button class="primary queue-button" type="button" disabled={!canQueue} onclick={onQueue}>
-          {operationLabel(operation)}
+          {operationLabel(locale, operation)}
         </button>
       </div>
     {/if}
@@ -222,7 +238,7 @@
     padding: 5px 8px;
     border: 1px solid color-mix(in srgb, var(--oxide-teal) 40%, transparent);
     border-radius: 999px;
-    color: var(--oxide-teal);
+    color: var(--success-text);
     font: 600 9px var(--mono);
     text-transform: uppercase;
   }
@@ -374,7 +390,7 @@
     flex: none;
     place-items: center;
     border-radius: 50%;
-    color: var(--disc-blue);
+    color: var(--interactive);
     background: color-mix(in srgb, var(--disc-blue) 10%, transparent);
     font: 12px var(--mono);
   }

@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification; M0–M4 completed.
+Status: accepted specification; M0–M5 completed.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -196,9 +196,14 @@ Target commits:
 
 ### M5 — Localization and accessibility
 
-- [ ] Complete German and English translation dictionaries.
-- [ ] Localize dates, numbers, and sizes.
-- [ ] Verify keyboard navigation, focus order, contrast, screen-reader labels, theme behavior, and reduced motion.
+- [x] Complete German and English translation dictionaries.
+- [x] Localize dates, numbers, and sizes.
+- [x] Verify keyboard navigation, focus order, contrast, screen-reader labels, theme behavior, and reduced motion.
+
+The initial interface language follows the operating-system locale and can be changed from the
+navigation rail. Hunk persists an explicit language choice in backend-owned settings. Both themes
+retain the accepted product palette while using higher-contrast derived colors for small text and
+focus indicators.
 
 Target commit: `feat(app): add localization and accessibility`
 

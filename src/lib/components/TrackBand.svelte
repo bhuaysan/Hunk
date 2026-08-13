@@ -1,21 +1,33 @@
 <script lang="ts">
+  import { formatNumber, t, trackLabel, type Locale } from '../i18n';
   import type { Track } from '../types';
 
   export let tracks: Track[] = [];
   export let progress: number | null = null;
   export let compact = false;
+  export let locale: Locale;
 
   $: visibleTracks = tracks.length
     ? tracks
     : [{ number: 1, kind: 'unknown' as const, sourceFile: '', startLba: null, sectorSize: null }];
-  $: summary = visibleTracks.map((track) => `Track ${track.number}: ${track.kind}`).join(', ');
+  $: summary = [
+    ...visibleTracks.map((track) =>
+      t(locale, 'trackDescription', {
+        number: formatNumber(locale, track.number),
+        kind: trackLabel(locale, track.kind),
+      }),
+    ),
+    ...(progress === null
+      ? []
+      : [t(locale, 'progressComplete', { value: formatNumber(locale, Math.round(progress)) })]),
+  ].join(', ');
 </script>
 
 <div class:compact class="track-figure" role="img" aria-label={summary}>
   {#if !compact}
     <div class="track-labels" aria-hidden="true">
       {#each visibleTracks as track}
-        <span>{track.number.toString().padStart(2, '0')} · {track.kind}</span>
+        <span>{track.number.toString().padStart(2, '0')} · {trackLabel(locale, track.kind)}</span>
       {/each}
     </div>
   {/if}

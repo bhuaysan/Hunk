@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { open } from '@tauri-apps/plugin-dialog';
+import { t, type Locale } from './i18n';
 import type {
   DiscoveryReport,
   JobProgress,
@@ -22,28 +23,30 @@ export async function discover(paths: string[]): Promise<DiscoveryReport> {
   return invoke<DiscoveryReport>('discover_sources', { paths });
 }
 
-export async function chooseSources(directory: boolean): Promise<string[]> {
-  if (!isDesktop()) throw new Error('Native file selection is available in the desktop app.');
+export async function chooseSources(directory: boolean, locale: Locale): Promise<string[]> {
+  if (!isDesktop()) throw new Error(t(locale, 'nativeFilesOnly'));
   const selection = await open({
     directory,
     multiple: !directory,
-    title: directory ? 'Add a folder to Hunk' : 'Add disc images to Hunk',
+    title: t(locale, directory ? 'addFolderDialog' : 'addImagesDialog'),
     filters: directory
       ? undefined
-      : [{ name: 'Optical images', extensions: ['cue', 'gdi', 'iso', 'chd'] }],
+      : [{ name: t(locale, 'opticalImages'), extensions: ['cue', 'gdi', 'iso', 'chd'] }],
   });
   if (!selection) return [];
   return Array.isArray(selection) ? selection : [selection];
 }
 
-export async function chooseDestination(defaultPath?: string): Promise<string | null> {
-  if (!isDesktop())
-    throw new Error('Native destination selection is available in the desktop app.');
+export async function chooseDestination(
+  locale: Locale,
+  defaultPath?: string,
+): Promise<string | null> {
+  if (!isDesktop()) throw new Error(t(locale, 'nativeDestinationOnly'));
   const selection = await open({
     directory: true,
     multiple: false,
     defaultPath,
-    title: 'Choose a destination folder',
+    title: t(locale, 'destinationDialog'),
   });
   return typeof selection === 'string' ? selection : null;
 }

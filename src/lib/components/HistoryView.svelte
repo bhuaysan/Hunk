@@ -1,87 +1,101 @@
 <script lang="ts">
-  import { basename, formatBytes, operationLabel } from '../presentation';
+  import {
+    formatBytes,
+    formatDate,
+    formatNumber,
+    jobStateLabel,
+    operationLabel,
+    t,
+    type Locale,
+  } from '../i18n';
+  import { basename } from '../presentation';
   import type { JobRecord } from '../types';
 
   export let items: JobRecord[] = [];
+  export let locale: Locale;
   export let onWorkbench: () => void;
   export let onRetry: (id: string) => void;
   export let onRemove: (id: string) => void;
-
-  const date = (timestamp: number | null) =>
-    timestamp === null ? '—' : new Date(timestamp).toLocaleString();
 </script>
 
 <section class="history-view" aria-labelledby="history-title">
   <header class="history-heading">
     <div>
-      <p class="section-label">Latest 100 jobs</p>
-      <h1 id="history-title">History</h1>
+      <p class="section-label">{t(locale, 'latestJobs')}</p>
+      <h1 id="history-title">{t(locale, 'history')}</h1>
     </div>
-    <span>{items.length} records</span>
+    <span>
+      {formatNumber(locale, items.length)}
+      {t(locale, items.length === 1 ? 'record' : 'records')}
+    </span>
   </header>
   {#if items.length === 0}
     <div class="history-empty">
       <div aria-hidden="true">⌁</div>
-      <h2>Completed work will collect here.</h2>
-      <p>
-        Each record includes paths, size savings, timestamps, status, and a bounded process log.
-      </p>
-      <button type="button" class="primary" onclick={onWorkbench}>Open workbench</button>
+      <h2>{t(locale, 'historyEmpty')}</h2>
+      <p>{t(locale, 'historyExplanation')}</p>
+      <button type="button" class="primary" onclick={onWorkbench}
+        >{t(locale, 'openWorkbench')}</button
+      >
     </div>
   {:else}
     <div class="history-list">
       {#each items as item (item.id)}
         <article>
-          <div class={`history-status ${item.state}`}>{item.state}</div>
+          <div class={`history-status ${item.state}`}>{jobStateLabel(locale, item.state)}</div>
           <div class="history-main">
             <h2>{basename(item.spec.source.primaryFile)}</h2>
-            <p>{operationLabel(item.spec.operation)} · {date(item.finishedAt)}</p>
+            <p>
+              {operationLabel(locale, item.spec.operation)} · {formatDate(locale, item.finishedAt)}
+            </p>
             {#if item.error}<p class="history-error">{item.error}</p>{/if}
             <dl>
               <div>
-                <dt>Input</dt>
+                <dt>{t(locale, 'input')}</dt>
                 <dd title={item.spec.source.primaryFile}>{item.spec.source.primaryFile}</dd>
               </div>
               <div>
-                <dt>Output</dt>
-                <dd title={item.spec.destination ?? ''}>{item.spec.destination ?? 'No output'}</dd>
-              </div>
-              <div>
-                <dt>Size</dt>
-                <dd>
-                  {formatBytes(item.inputSize)} → {item.outputSize === null
-                    ? '—'
-                    : formatBytes(item.outputSize)}
+                <dt>{t(locale, 'output')}</dt>
+                <dd title={item.spec.destination ?? ''}>
+                  {item.spec.destination ?? t(locale, 'noOutput')}
                 </dd>
               </div>
               <div>
-                <dt>Started</dt>
-                <dd>{date(item.startedAt)}</dd>
+                <dt>{t(locale, 'size')}</dt>
+                <dd>
+                  {formatBytes(locale, item.inputSize)} → {item.outputSize === null
+                    ? '—'
+                    : formatBytes(locale, item.outputSize)}
+                </dd>
+              </div>
+              <div>
+                <dt>{t(locale, 'started')}</dt>
+                <dd>{formatDate(locale, item.startedAt)}</dd>
               </div>
             </dl>
             {#if item.chdInfo}
               <details class="chd-info">
-                <summary>CHD information</summary>
+                <summary>{t(locale, 'chdInformation')}</summary>
                 <dl>
                   <div>
-                    <dt>Version</dt>
-                    <dd>{item.chdInfo.formatVersion}</dd>
+                    <dt>{t(locale, 'version')}</dt>
+                    <dd>{formatNumber(locale, item.chdInfo.formatVersion)}</dd>
                   </div>
                   <div>
-                    <dt>Media</dt>
+                    <dt>{t(locale, 'media')}</dt>
                     <dd>{item.chdInfo.mediaKind.toUpperCase()}</dd>
                   </div>
                   <div>
-                    <dt>Logical</dt>
-                    <dd>{formatBytes(item.chdInfo.logicalSize)}</dd>
+                    <dt>{t(locale, 'logical')}</dt>
+                    <dd>{formatBytes(locale, item.chdInfo.logicalSize)}</dd>
                   </div>
                   <div>
-                    <dt>Compressed</dt>
-                    <dd>{formatBytes(item.chdInfo.compressedSize)}</dd>
+                    <dt>{t(locale, 'compressed')}</dt>
+                    <dd>{formatBytes(locale, item.chdInfo.compressedSize)}</dd>
                   </div>
                   <div>
-                    <dt>Codecs</dt>
-                    <dd>{item.chdInfo.codecs.join(', ') || 'None'}</dd>
+                    <dt>{t(locale, 'codecs')}</dt>
+                    <dd>{item.chdInfo.codecs.join(', ') || t(locale, 'none')}</dd>
                   </div>
                   <div>
                     <dt>SHA-1</dt>
@@ -91,15 +105,17 @@
               </details>
             {/if}
             <details>
-              <summary>Process log ({item.log.length})</summary>
-              <pre>{item.log.join('\n') || 'No process output was recorded.'}</pre>
+              <summary>
+                {t(locale, 'processLog', { count: formatNumber(locale, item.log.length) })}
+              </summary>
+              <pre>{item.log.join('\n') || t(locale, 'noProcessOutput')}</pre>
             </details>
           </div>
           <div class="history-actions">
             {#if item.state !== 'completed'}<button type="button" onclick={() => onRetry(item.id)}
-                >Retry</button
+                >{t(locale, 'retry')}</button
               >{/if}
-            <button type="button" onclick={() => onRemove(item.id)}>Remove</button>
+            <button type="button" onclick={() => onRemove(item.id)}>{t(locale, 'remove')}</button>
           </div>
         </article>
       {/each}
@@ -141,7 +157,7 @@
     margin-bottom: 20px;
     border: 1px solid var(--alloy);
     border-radius: 50%;
-    color: var(--disc-blue);
+    color: var(--interactive);
     font: 22px var(--mono);
   }
   .history-empty h2 {
@@ -169,7 +185,7 @@
   }
   .history-status {
     align-self: start;
-    color: var(--oxide-teal);
+    color: var(--success-text);
     font: 600 9px var(--mono);
     text-transform: uppercase;
   }
@@ -229,7 +245,8 @@
   }
   summary,
   .history-actions button {
-    color: var(--disc-blue);
+    min-height: 28px;
+    color: var(--interactive);
     font-size: 10px;
     font-weight: 600;
     cursor: pointer;

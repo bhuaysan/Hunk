@@ -180,6 +180,7 @@ mod tests {
         store
             .save_settings(&Settings {
                 destination_directory: Some("output".into()),
+                locale: Some(crate::jobs::model::Locale::De),
             })
             .unwrap();
 
@@ -188,6 +189,22 @@ mod tests {
             store.load_settings().unwrap().destination_directory,
             Some(PathBuf::from("output"))
         );
+        assert_eq!(
+            store.load_settings().unwrap().locale,
+            Some(crate::jobs::model::Locale::De)
+        );
+    }
+
+    #[test]
+    fn loads_settings_written_before_locale_preferences_existed() {
+        let settings: Settings =
+            serde_json::from_str(r#"{"destinationDirectory":"output"}"#).unwrap();
+
+        assert_eq!(
+            settings.destination_directory,
+            Some(PathBuf::from("output"))
+        );
+        assert_eq!(settings.locale, None);
     }
 
     #[test]

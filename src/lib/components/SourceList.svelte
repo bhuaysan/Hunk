@@ -1,19 +1,22 @@
 <script lang="ts">
-  import { basename, formatBytes, formatMedia } from '../presentation';
+  import { formatBytes, mediaLabel, t, type Locale } from '../i18n';
+  import { basename } from '../presentation';
   import type { SourceSet } from '../types';
   import TrackBand from './TrackBand.svelte';
 
   export let sources: SourceSet[] = [];
   export let selected = 0;
+  export let locale: Locale;
+  export let inactive = false;
   export let onSelect: (index: number) => void;
   export let onRemove: (index: number) => void;
 </script>
 
-<section class="source-panel" aria-labelledby="sources-title">
+<section class="source-panel" aria-labelledby="sources-title" inert={inactive}>
   <div class="panel-heading">
     <div>
-      <p class="section-label">Imported sets</p>
-      <h2 id="sources-title">Sources</h2>
+      <p class="section-label">{t(locale, 'importedSets')}</p>
+      <h2 id="sources-title">{t(locale, 'sources')}</h2>
     </div>
     <span class="count">{sources.length.toString().padStart(2, '0')}</span>
   </div>
@@ -34,22 +37,26 @@
           <span class="source-summary">
             <span class="source-name">{basename(source.primaryFile)}</span>
             <span class="source-meta">
-              {source.format.toUpperCase()} · {formatMedia(source.mediaKind)} · {formatBytes(
+              {source.format.toUpperCase()} · {mediaLabel(locale, source.mediaKind)} · {formatBytes(
+                locale,
                 source.totalSize,
               )}
             </span>
-            <TrackBand tracks={source.tracks} compact />
+            <TrackBand tracks={source.tracks} {locale} compact />
           </span>
           <span
             class:bad={source.validationProblems.length > 0}
             class="source-state"
-            aria-label={source.validationProblems.length ? 'Needs attention' : 'Ready'}
+            aria-hidden="true"
           ></span>
+          <span class="sr-only">
+            {source.validationProblems.length ? t(locale, 'needsAttention') : t(locale, 'ready')}
+          </span>
         </button>
         <button
           class="remove"
           type="button"
-          aria-label={`Remove ${basename(source.primaryFile)}`}
+          aria-label={t(locale, 'removeSource', { name: basename(source.primaryFile) })}
           onclick={() => onRemove(index)}>×</button
         >
       </div>
@@ -148,8 +155,8 @@
     top: 5px;
     right: 5px;
     display: grid;
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
     place-items: center;
     border: 0;
     border-radius: 50%;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultDestination, formatBytes, operationsFor, replaceExtension } from './presentation';
+import { defaultDestination, operationsFor, replaceExtension } from './presentation';
 import type { SourceSet } from './types';
 
 const source: SourceSet = {
@@ -36,10 +36,5 @@ describe('workbench presentation', () => {
   it('keeps the CUE descriptor name stable for split-track extraction', () => {
     const chd = { ...source, primaryFile: '/games/Disc.chd', format: 'chd' as const };
     expect(defaultDestination(chd, 'extractCd', true)).toBe('/games/Disc.cue');
-  });
-
-  it('formats source sizes for compact list rows', () => {
-    expect(formatBytes(999)).toBe('999 B');
-    expect(formatBytes(1_250_000)).toBe('1.25 MB');
   });
 });

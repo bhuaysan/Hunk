@@ -133,6 +133,14 @@ pub struct QueueSnapshot {
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub destination_directory: Option<PathBuf>,
+    pub locale: Option<Locale>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Locale {
+    En,
+    De,
 }
 
 pub fn now_millis() -> u64 {
