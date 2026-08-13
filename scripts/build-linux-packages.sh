@@ -27,6 +27,10 @@ for required_tool in dpkg-deb file find flatpak grep pnpm sed sha256sum tar unam
 done
 
 if command -v flatpak-builder >/dev/null 2>&1; then
+    if ! command -v appstream-compose >/dev/null 2>&1; then
+        printf 'Native flatpak-builder requires appstream-compose.\n' >&2
+        exit 1
+    fi
     flatpak_builder=(flatpak-builder)
 elif flatpak info org.flatpak.Builder >/dev/null 2>&1; then
     flatpak_builder=(
@@ -98,7 +102,7 @@ CCACHE_DIR="${REPOSITORY_DIRECTORY}/src-tauri/target/ccache" \
     LDAI_NO_APPSTREAM=1 \
     NO_STRIP=1 \
     XDG_CACHE_HOME="${REPOSITORY_DIRECTORY}/src-tauri/target/xdg-cache" \
-    pnpm --dir "${REPOSITORY_DIRECTORY}" tauri build \
+    pnpm --dir "${REPOSITORY_DIRECTORY}" tauri build --verbose \
         --config "${REPOSITORY_DIRECTORY}/src-tauri/tauri.bundle.conf.json" \
         --bundles appimage,deb
 

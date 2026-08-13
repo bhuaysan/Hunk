@@ -24,9 +24,10 @@ disabled while the canonical metadata is validated explicitly before every packa
 ## Local package build
 
 Install the normal development requirements plus `appstreamcli`, `desktop-file-validate`, `dpkg-deb`,
-`file`, and `flatpak`. Use either your distribution's `flatpak-builder` package or the sandboxed
-`org.flatpak.Builder` tool. The manifest disables a separate debug extension because the copied
-release binaries are already stripped. Install the Flatpak runtime and SDK:
+`file`, and `flatpak`. Use either your distribution's `flatpak-builder` and `appstream-compose`
+packages or the sandboxed `org.flatpak.Builder` tool. The manifest disables a separate debug
+extension because the copied release binaries are already stripped. Install the Flatpak runtime and
+SDK:
 
 ```sh
 flatpak install flathub org.gnome.Platform//50 org.gnome.Sdk//50
