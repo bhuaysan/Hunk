@@ -35,7 +35,8 @@ flatpak install --user flathub org.flatpak.Builder org.gnome.Platform//50 org.gn
 
 Keep these components in Flatpak's default user installation. The packaging script exposes that
 installation read-only to the sandboxed builder so the pinned SDK remains discoverable on older
-Flatpak hosts such as Ubuntu 22.04.
+Flatpak hosts such as Ubuntu 22.04. Temporary builder state stays under `src-tauri/target`, inside
+the project path granted to the builder sandbox.
 
 Then run:
 

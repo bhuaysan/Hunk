@@ -10,7 +10,8 @@ readonly SIDECAR_DIRECTORY="${REPOSITORY_DIRECTORY}/src-tauri/binaries"
 readonly SIDECAR_BINARY="${SIDECAR_DIRECTORY}/chdman-x86_64-unknown-linux-gnu"
 readonly SOURCE_ARCHIVE="${SIDECAR_DIRECTORY}/mame-${MAME_TAG}-source.tar.gz"
 readonly COMPLIANCE_DIRECTORY="${SIDECAR_DIRECTORY}/mame-${MAME_TAG}-compliance"
-readonly BUNDLE_DIRECTORY="${REPOSITORY_DIRECTORY}/src-tauri/target/release/bundle"
+readonly TARGET_DIRECTORY="${REPOSITORY_DIRECTORY}/src-tauri/target"
+readonly BUNDLE_DIRECTORY="${TARGET_DIRECTORY}/release/bundle"
 readonly DEB_DIRECTORY="${BUNDLE_DIRECTORY}/deb"
 readonly APPIMAGE_DIRECTORY="${BUNDLE_DIRECTORY}/appimage"
 readonly FLATPAK_OUTPUT_DIRECTORY="${BUNDLE_DIRECTORY}/flatpak"
@@ -18,9 +19,10 @@ readonly FLATPAK_OUTPUT="${FLATPAK_OUTPUT_DIRECTORY}/Hunk_x86_64.flatpak"
 readonly CHECKSUM_FILE="${BUNDLE_DIRECTORY}/SHA256SUMS"
 readonly FLATPAK_PAYLOAD="${REPOSITORY_DIRECTORY}/packaging/hunk-linux.tar.gz"
 readonly FLATPAK_MANIFEST="${REPOSITORY_DIRECTORY}/packaging/app.hunk.Hunk.yml"
+readonly PACKAGE_WORK_ROOT="${TARGET_DIRECTORY}/package-work"
 readonly USER_FLATPAK_DIRECTORY="${HOME:?HOME must be set}/.local/share/flatpak"
 
-for required_tool in dpkg-deb file find flatpak grep pnpm sed sha256sum tar uname; do
+for required_tool in dpkg-deb file find flatpak grep mktemp pnpm sed sha256sum tar uname; do
     if ! command -v "${required_tool}" >/dev/null 2>&1; then
         printf 'Required packaging tool is missing: %s\n' "${required_tool}" >&2
         exit 1
@@ -92,7 +94,9 @@ if find "${DEB_DIRECTORY}" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null | gr
     exit 1
 fi
 
-readonly WORK_DIRECTORY="$(mktemp -d)"
+mkdir --parents -- "${PACKAGE_WORK_ROOT}"
+readonly WORK_DIRECTORY="$(mktemp --directory \
+    --tmpdir="${PACKAGE_WORK_ROOT}" hunk-package.XXXXXXXXXX)"
 cleanup() {
     rm -rf -- "${WORK_DIRECTORY}"
     rm -f -- "${FLATPAK_PAYLOAD}"
