@@ -12,6 +12,83 @@ pub enum MediaKind {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub enum Operation {
+    CreateCd,
+    CreateDvd,
+    ExtractCd,
+    ExtractDvd,
+    Verify,
+    Info,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum JobPhase {
+    Inspecting,
+    Compressing,
+    Extracting,
+    Verifying,
+    Complete,
+    Unknown,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JobProgress {
+    pub phase: JobPhase,
+    pub percentage: Option<f32>,
+    pub processed_bytes: Option<u64>,
+    pub elapsed_millis: Option<u64>,
+    pub message: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChdHashes {
+    pub sha1: Option<String>,
+    pub data_sha1: Option<String>,
+    pub parent_sha1: Option<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChdTrack {
+    pub number: u32,
+    pub kind: TrackKind,
+    pub frames: Option<u64>,
+    pub pregap: Option<u64>,
+    pub postgap: Option<u64>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChdMetadata {
+    pub tag: String,
+    pub index: u32,
+    pub length: u64,
+    pub value: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChdInfo {
+    pub format_version: u32,
+    pub media_kind: MediaKind,
+    pub codecs: Vec<String>,
+    pub logical_size: u64,
+    pub compressed_size: u64,
+    pub ratio: Option<f64>,
+    pub hunk_size: u64,
+    pub total_hunks: u64,
+    pub unit_size: u64,
+    pub total_units: u64,
+    pub hashes: ChdHashes,
+    pub tracks: Vec<ChdTrack>,
+    pub metadata: Vec<ChdMetadata>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum SourceFormat {
     Cue,
     Gdi,

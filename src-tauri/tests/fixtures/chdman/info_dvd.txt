@@ -1,0 +1,16 @@
+chdman - MAME Compressed Hunks of Data (CHD) manager 0.289
+Input file:   film.chd
+File Version: 5
+Logical size: 4,700,000,000 bytes
+Hunk Size:    4,096 bytes
+Total Hunks:  1,147,461
+Unit Size:    2,048 bytes
+Total Units:  2,294,922
+Compression:  lzma (LZMA), zlib (Deflate), huff (Huffman), flac (FLAC)
+CHD size:     3,100,000,000 bytes
+Ratio:        66.0%
+SHA1:         fedcba9876543210fedcba9876543210fedcba98
+Data SHA1:    76543210fedcba9876543210fedcba9876543210
+Parent SHA1:  (none)
+Metadata:     Tag='DVD ' Index=0 Length=1 bytes
+              0

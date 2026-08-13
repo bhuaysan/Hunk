@@ -1,3 +1,4 @@
+pub mod chdman;
 pub mod discovery;
 pub mod domain;
 

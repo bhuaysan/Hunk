@@ -1,0 +1,1 @@
+Error opening output file (result.chd): File already exists

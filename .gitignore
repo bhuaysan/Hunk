@@ -33,8 +33,9 @@ Thumbs.db
 *.deb
 *.rpm
 
-chdman
-chdman.exe
+/chdman
+/chdman.exe
+src-tauri/binaries/
 *.hunk-part
 *.hunk-tmp
 

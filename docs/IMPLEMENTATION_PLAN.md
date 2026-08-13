@@ -156,11 +156,11 @@ Target commit: `feat(core): discover and validate optical images`
 
 ### M2 — chdman integration
 
-- [ ] Pin and reproducibly build the approved official MAME source tag.
-- [ ] Add version/capability checks.
-- [ ] Build safe commands for all six 0.1 operations.
-- [ ] Parse information, progress, verification results, and actionable errors.
-- [ ] Add golden and process-level integration tests.
+- [x] Pin and reproducibly build the approved official MAME source tag (`mame0289`, commit `f34f02505e32c1993c6a782b6814232cbfc74e36`).
+- [x] Add version/capability checks.
+- [x] Build safe commands for all six 0.1 operations.
+- [x] Parse information, progress, verification results, and actionable errors.
+- [x] Add golden and process-level integration tests.
 
 Target commit: `feat(core): integrate pinned chdman operations`
 

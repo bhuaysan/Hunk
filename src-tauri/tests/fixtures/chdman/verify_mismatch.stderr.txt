@@ -1,0 +1,2 @@
+Error: Raw SHA1 in header = 0123456789abcdef0123456789abcdef01234567
+              actual SHA1 = 89abcdef0123456789abcdef0123456789abcdef

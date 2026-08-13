@@ -1,0 +1,32 @@
+name: Approved chdman
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-check:
+    name: Build and check pinned sidecar
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            build-essential \
+            libsdl2-dev \
+            python3
+      - name: Build pinned chdman
+        env:
+          HUNK_BUILD_JOBS: 4
+        run: ./scripts/build-chdman.sh
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check version and capabilities through Hunk
+        env:
+          HUNK_CHDMAN: src-tauri/binaries/chdman-x86_64-unknown-linux-gnu
+        run: >-
+          cargo test --manifest-path src-tauri/Cargo.toml
+          --test chdman_process approved_real_binary_reports_required_capabilities -- --ignored

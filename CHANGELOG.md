@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Safe integration for the pinned MAME 0.289 `chdman`, including capability checks and structured information, progress, verification, and error parsing.
 - Recursive CUE/BIN, GDI, ISO, and CHD source discovery with source-set de-duplication.
 - Structured validation for missing, duplicate, escaping, unreadable, and malformed track references.
 - Launchable Tauri 2 desktop foundation with a Svelte 5 and TypeScript interface.
