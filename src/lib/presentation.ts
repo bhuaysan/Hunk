@@ -46,7 +46,7 @@ export function defaultDestination(
     case 'createDvd':
       return replaceExtension(source.primaryFile, '.chd');
     case 'extractCd':
-      return replaceExtension(source.primaryFile, splitBin ? ' - Track %t.cue' : '.cue');
+      return replaceExtension(source.primaryFile, '.cue');
     case 'extractDvd':
       return replaceExtension(source.primaryFile, '.iso');
     case 'verify':

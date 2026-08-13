@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MediaKind {
     Cd,
@@ -10,7 +10,7 @@ pub enum MediaKind {
     UnknownOptical,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Operation {
     CreateCd,
@@ -21,7 +21,7 @@ pub enum Operation {
     Info,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum JobPhase {
     Inspecting,
@@ -32,7 +32,7 @@ pub enum JobPhase {
     Unknown,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct JobProgress {
     pub phase: JobPhase,
@@ -42,7 +42,7 @@ pub struct JobProgress {
     pub message: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChdHashes {
     pub sha1: Option<String>,
@@ -50,7 +50,7 @@ pub struct ChdHashes {
     pub parent_sha1: Option<String>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChdTrack {
     pub number: u32,
@@ -60,7 +60,7 @@ pub struct ChdTrack {
     pub postgap: Option<u64>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChdMetadata {
     pub tag: String,
@@ -69,7 +69,7 @@ pub struct ChdMetadata {
     pub value: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ChdInfo {
     pub format_version: u32,
@@ -87,7 +87,7 @@ pub struct ChdInfo {
     pub metadata: Vec<ChdMetadata>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SourceFormat {
     Cue,
@@ -96,7 +96,7 @@ pub enum SourceFormat {
     Chd,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TrackKind {
     Data,
@@ -105,7 +105,7 @@ pub enum TrackKind {
     Unknown,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Track {
     pub number: u32,
@@ -115,7 +115,7 @@ pub struct Track {
     pub sector_size: Option<u32>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ValidationProblemKind {
     MissingReference,
@@ -128,7 +128,7 @@ pub enum ValidationProblemKind {
     TrackCountMismatch,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ValidationProblem {
     pub kind: ValidationProblemKind,
@@ -150,7 +150,7 @@ impl ValidationProblem {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceSet {
     pub primary_file: PathBuf,
@@ -168,7 +168,7 @@ impl SourceSet {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DiscoveryIssueKind {
     InputNotFound,
@@ -176,14 +176,14 @@ pub enum DiscoveryIssueKind {
     UnsupportedInput,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DiscoveryIssue {
     pub kind: DiscoveryIssueKind,
     pub path: PathBuf,
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DiscoveryReport {
     pub source_sets: Vec<SourceSet>,

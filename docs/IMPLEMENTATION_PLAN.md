@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification; M0–M2 and M4 completed, M3 remains pending.
+Status: accepted specification; M0–M4 completed.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -123,10 +123,16 @@ Every mutating operation follows this sequence:
 3. Create a uniquely named Hunk-owned temporary output on the destination filesystem.
 4. Run the appropriate `chdman` operation using an argument array.
 5. For creation, run a full `chdman verify` against the temporary CHD.
-6. Atomically rename the verified temporary output to the final destination.
+6. Atomically publish the verified temporary output without replacing an existing destination.
 7. Record the result and size information in history.
 
 On failure or cancellation, Hunk may remove only temporary files it created and can positively identify. It must leave all sources and pre-existing destinations untouched. Closing the app with an active job requires confirmation.
+
+Publication uses a same-filesystem hard-link followed by removal of the temporary name instead of
+the standard rename API: common rename APIs replace an existing destination on some platforms,
+while hard-link creation fails on collision and makes the final name visible atomically. Multi-file CD
+extraction publishes BIN dependencies before the CUE descriptor and rolls back newly published links
+if any publication fails.
 
 CUE and GDI references are resolved relative to their descriptor directory. Both slash styles are accepted, while absolute paths, lexical parent escapes, and symlinks resolving outside that directory are validation errors. Recursive discovery does not follow directory symlinks.
 
@@ -166,10 +172,10 @@ Target commit: `feat(core): integrate pinned chdman operations`
 
 ### M3 — Durable job engine
 
-- [ ] Implement preflight, serial scheduling, pause/resume of queued work, cancellation, and retry.
-- [ ] Implement temporary output, full verification, atomic publication, and cleanup invariants.
-- [ ] Add SQLite settings and a 100-entry job history.
-- [ ] Recover active jobs as interrupted after restart.
+- [x] Implement preflight, serial scheduling, pause/resume of queued work, cancellation, and retry.
+- [x] Implement temporary output, full verification, atomic publication, and cleanup invariants.
+- [x] Add SQLite settings and a 100-entry job history.
+- [x] Recover active jobs as interrupted after restart.
 
 Target commit: `feat(core): add durable verified job queue`
 
@@ -180,9 +186,8 @@ Target commit: `feat(core): add durable verified job queue`
 - [x] Add explicit ISO media selection and advanced options.
 - [x] Add queue and history views, conflict handling, logs, and human-readable errors.
 
-The workbench prepares typed queue entries in the webview. Execution, durable queue and history
-hydration, progress events, cancellation, and retry remain owned by the M3 backend milestone; the UI
-is intentionally ready for those narrow commands without receiving general filesystem or shell access.
+The workbench uses the M3 backend through narrow typed commands and receives queue, job-state, and
+progress events. SQLite and all filesystem and process access remain exclusively in the Rust backend.
 
 Target commits:
 

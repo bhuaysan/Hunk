@@ -1,10 +1,14 @@
 <script lang="ts">
-  import { formatBytes, operationLabel } from '../presentation';
-  import type { HistoryItem } from '../types';
+  import { basename, formatBytes, operationLabel } from '../presentation';
+  import type { JobRecord } from '../types';
 
-  export let items: HistoryItem[] = [];
+  export let items: JobRecord[] = [];
   export let onWorkbench: () => void;
+  export let onRetry: (id: string) => void;
   export let onRemove: (id: string) => void;
+
+  const date = (timestamp: number | null) =>
+    timestamp === null ? '—' : new Date(timestamp).toLocaleString();
 </script>
 
 <section class="history-view" aria-labelledby="history-title">
@@ -28,18 +32,19 @@
     <div class="history-list">
       {#each items as item (item.id)}
         <article>
-          <div class={`history-status ${item.status}`}>{item.status}</div>
+          <div class={`history-status ${item.state}`}>{item.state}</div>
           <div class="history-main">
-            <h2>{item.sourceName}</h2>
-            <p>{operationLabel(item.operation)} · {item.finishedAt.toLocaleString()}</p>
+            <h2>{basename(item.spec.source.primaryFile)}</h2>
+            <p>{operationLabel(item.spec.operation)} · {date(item.finishedAt)}</p>
+            {#if item.error}<p class="history-error">{item.error}</p>{/if}
             <dl>
               <div>
                 <dt>Input</dt>
-                <dd title={item.sourcePath}>{item.sourcePath}</dd>
+                <dd title={item.spec.source.primaryFile}>{item.spec.source.primaryFile}</dd>
               </div>
               <div>
                 <dt>Output</dt>
-                <dd title={item.destination ?? ''}>{item.destination ?? 'No output'}</dd>
+                <dd title={item.spec.destination ?? ''}>{item.spec.destination ?? 'No output'}</dd>
               </div>
               <div>
                 <dt>Size</dt>
@@ -49,14 +54,51 @@
                     : formatBytes(item.outputSize)}
                 </dd>
               </div>
+              <div>
+                <dt>Started</dt>
+                <dd>{date(item.startedAt)}</dd>
+              </div>
             </dl>
+            {#if item.chdInfo}
+              <details class="chd-info">
+                <summary>CHD information</summary>
+                <dl>
+                  <div>
+                    <dt>Version</dt>
+                    <dd>{item.chdInfo.formatVersion}</dd>
+                  </div>
+                  <div>
+                    <dt>Media</dt>
+                    <dd>{item.chdInfo.mediaKind.toUpperCase()}</dd>
+                  </div>
+                  <div>
+                    <dt>Logical</dt>
+                    <dd>{formatBytes(item.chdInfo.logicalSize)}</dd>
+                  </div>
+                  <div>
+                    <dt>Compressed</dt>
+                    <dd>{formatBytes(item.chdInfo.compressedSize)}</dd>
+                  </div>
+                  <div>
+                    <dt>Codecs</dt>
+                    <dd>{item.chdInfo.codecs.join(', ') || 'None'}</dd>
+                  </div>
+                  <div>
+                    <dt>SHA-1</dt>
+                    <dd class="hash">{item.chdInfo.hashes.sha1 ?? '—'}</dd>
+                  </div>
+                </dl>
+              </details>
+            {/if}
             <details>
-              <summary>Process log</summary>
-              <pre>{item.log.join('\n')}</pre>
+              <summary>Process log ({item.log.length})</summary>
+              <pre>{item.log.join('\n') || 'No process output was recorded.'}</pre>
             </details>
           </div>
           <div class="history-actions">
-            {#if item.status !== 'completed'}<button type="button">Retry</button>{/if}
+            {#if item.state !== 'completed'}<button type="button" onclick={() => onRetry(item.id)}
+                >Retry</button
+              >{/if}
             <button type="button" onclick={() => onRemove(item.id)}>Remove</button>
           </div>
         </article>
@@ -132,7 +174,8 @@
     text-transform: uppercase;
   }
   .history-status.failed,
-  .history-status.interrupted {
+  .history-status.interrupted,
+  .history-status.blocked {
     color: var(--danger);
   }
   .history-main h2 {
@@ -144,6 +187,12 @@
     color: var(--muted);
     font-size: 10px;
   }
+  .history-main > p.history-error {
+    padding: 8px 10px;
+    border-radius: 5px;
+    color: var(--danger-text);
+    background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  }
   dl {
     display: grid;
     gap: 7px;
@@ -151,7 +200,7 @@
   }
   dl div {
     display: grid;
-    grid-template-columns: 55px minmax(0, 1fr);
+    grid-template-columns: 65px minmax(0, 1fr);
     gap: 10px;
   }
   dt {
@@ -167,8 +216,16 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .hash {
+    font-family: var(--mono);
+  }
   details {
     margin-top: 12px;
+  }
+  .chd-info {
+    padding: 10px;
+    border: 1px solid var(--alloy);
+    border-radius: 6px;
   }
   summary,
   .history-actions button {

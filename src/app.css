@@ -336,9 +336,67 @@ main {
   min-height: calc(100vh - 90px);
 }
 
+.queue-import {
+  display: grid;
+  align-content: center;
+  padding: clamp(20px, 5vw, 58px);
+}
+
 .drawer-close,
 .drawer-backdrop {
   display: none;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgb(8 17 22 / 58%);
+  backdrop-filter: blur(3px);
+}
+
+.close-dialog {
+  width: min(430px, 100%);
+  padding: 25px;
+  border: 1px solid var(--alloy);
+  border-radius: var(--radius-lg);
+  color: var(--basalt);
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgb(8 17 22 / 30%);
+}
+
+.close-dialog h2 {
+  margin: 0 0 12px;
+  font: 600 29px/1.05 var(--display);
+}
+
+.close-dialog > p:not(.section-label) {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.close-dialog > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.danger-button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  color: #fff;
+  background: var(--danger);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 @media (prefers-color-scheme: dark) {

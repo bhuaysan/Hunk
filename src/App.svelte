@@ -6,15 +6,33 @@
   import Inspector from './lib/components/Inspector.svelte';
   import QueuePanel from './lib/components/QueuePanel.svelte';
   import SourceList from './lib/components/SourceList.svelte';
-  import { chooseDestination, chooseSources, discover, listenForDroppedPaths } from './lib/backend';
+  import {
+    cancelJob,
+    chooseDestination,
+    chooseSources,
+    confirmClose,
+    discover,
+    enqueueJob,
+    getHistory,
+    getQueue,
+    getSettings,
+    isDesktop,
+    listenForDroppedPaths,
+    listenForEngineEvents,
+    removeJob,
+    retryJob,
+    setQueuePaused,
+    updateSettings,
+  } from './lib/backend';
   import { basename, defaultDestination, dirname, operationsFor } from './lib/presentation';
   import type {
     AdvancedOptions,
     DiscoveryIssue,
-    HistoryItem,
+    JobRecord,
     MediaKind,
     Operation,
-    QueueItem,
+    QueueSnapshot,
+    Settings,
     SourceSet,
   } from './lib/types';
 
@@ -27,9 +45,11 @@
   let importing = false;
   let hovering = false;
   let inspectorOpen = false;
+  let closeConfirmation = false;
   let notice: { tone: 'error' | 'info'; text: string } | null = null;
-  let queue: QueueItem[] = [];
-  let history: HistoryItem[] = [];
+  let queue: QueueSnapshot = { paused: false, activeJobId: null, jobs: [] };
+  let history: JobRecord[] = [];
+  let settings: Settings = { destinationDirectory: null };
   let advanced: AdvancedOptions = { splitBin: false, processors: null, hunkSize: null };
 
   $: selected = sources[selectedIndex];
@@ -37,15 +57,67 @@
   $: operations = selected ? operationsFor(selected, selectedMedia) : [];
 
   onMount(() => {
-    let dispose: () => void = () => {};
-    listenForDroppedPaths(
-      (active) => (hovering = active),
-      (paths) => void importPaths(paths),
-    )
-      .then((unlisten) => (dispose = unlisten))
+    const disposers: Array<() => void> = [];
+    Promise.all([
+      listenForDroppedPaths(
+        (active) => (hovering = active),
+        (paths) => void importPaths(paths),
+      ),
+      listenForEngineEvents({
+        jobChanged: handleJobChanged,
+        progressChanged: (id, progress) => {
+          queue = {
+            ...queue,
+            jobs: queue.jobs.map((item) => (item.id === id ? { ...item, progress } : item)),
+          };
+        },
+        queueChanged: (snapshot) => (queue = snapshot),
+        closeRequested: () => (closeConfirmation = true),
+      }),
+    ])
+      .then((unlisten) => disposers.push(...unlisten))
       .catch((error: unknown) => showError(error));
-    return () => dispose();
+    if (isDesktop()) {
+      Promise.all([getQueue(), getHistory(), getSettings()])
+        .then(([queueState, records, preferences]) => {
+          queue = queueState;
+          history = records;
+          settings = preferences;
+          records.forEach(applyChdInfo);
+        })
+        .catch((error: unknown) => showError(error));
+    }
+    return () => disposers.forEach((dispose) => dispose());
   });
+
+  function handleJobChanged(record: JobRecord) {
+    if (record.chdInfo) applyChdInfo(record);
+    if (['completed', 'failed', 'cancelled', 'interrupted'].includes(record.state)) {
+      void getHistory()
+        .then((records) => (history = records))
+        .catch(showError);
+    }
+  }
+
+  function applyChdInfo(record: JobRecord) {
+    const info = record.chdInfo;
+    if (!info) return;
+    sources = sources.map((source) =>
+      source.primaryFile === record.spec.source.primaryFile
+        ? {
+            ...source,
+            mediaKind: info.mediaKind,
+            tracks: info.tracks.map((track) => ({
+              number: track.number,
+              kind: track.kind,
+              sourceFile: source.primaryFile,
+              startLba: null,
+              sectorSize: null,
+            })),
+          }
+        : source,
+    );
+  }
 
   function showError(error: unknown) {
     notice = {
@@ -140,23 +212,26 @@
     if (!selected || !operation) return;
     try {
       const folder = await chooseDestination(
-        destination ? dirname(destination) : dirname(selected.primaryFile),
+        destination
+          ? dirname(destination)
+          : (settings.destinationDirectory ?? dirname(selected.primaryFile)),
       );
       if (!folder) return;
       const fileName = basename(defaultDestination(selected, operation, advanced.splitBin) ?? '');
       const separator = folder.includes('\\') && !folder.includes('/') ? '\\' : '/';
       destination = `${folder.replace(/[\\/]$/, '')}${separator}${fileName}`;
+      settings = await updateSettings({ destinationDirectory: folder });
     } catch (error) {
       showError(error);
     }
   }
 
-  function queueOperation() {
+  async function queueOperation() {
     if (!selected || !operation) return;
     const collision =
       destination &&
-      queue.some(
-        (item) => item.destination?.toLocaleLowerCase() === destination?.toLocaleLowerCase(),
+      queue.jobs.some(
+        (item) => item.spec.destination?.toLocaleLowerCase() === destination?.toLocaleLowerCase(),
       );
     if (collision) {
       notice = {
@@ -165,23 +240,55 @@
       };
       return;
     }
-    queue = [
-      ...queue,
-      {
-        id: crypto.randomUUID(),
+    try {
+      await enqueueJob({
         source: selected,
         operation,
         destination,
-        status: 'queued',
-        message: 'Ready for serial processing',
-        createdAt: new Date(),
-      },
-    ];
-    notice = { tone: 'info', text: `${basename(selected.primaryFile)} was added to the queue.` };
+        options: advanced,
+      });
+      queue = await getQueue();
+      notice = { tone: 'info', text: `${basename(selected.primaryFile)} was added to the queue.` };
+    } catch (error) {
+      showError(error);
+    }
   }
 
-  function removeHistory(id: string) {
-    history = history.filter((item) => item.id !== id);
+  async function pauseQueue(paused: boolean) {
+    try {
+      queue = await setQueuePaused(paused);
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  async function cancelRecord(id: string) {
+    try {
+      await cancelJob(id);
+      queue = await getQueue();
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  async function retryRecord(id: string) {
+    try {
+      await retryJob(id);
+      queue = await getQueue();
+      view = 'workbench';
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  async function removeRecord(id: string) {
+    try {
+      await removeJob(id);
+      queue = await getQueue();
+      history = await getHistory();
+    } catch (error) {
+      showError(error);
+    }
   }
 </script>
 
@@ -223,9 +330,10 @@
       <HistoryView
         items={history}
         onWorkbench={() => (view = 'workbench')}
-        onRemove={removeHistory}
+        onRetry={(id) => void retryRecord(id)}
+        onRemove={(id) => void removeRecord(id)}
       />
-    {:else if sources.length === 0}
+    {:else if sources.length === 0 && queue.jobs.length === 0}
       <div class="empty-workbench">
         <header class="topbar">
           <div>
@@ -308,13 +416,27 @@
                 onOperation={selectOperation}
                 onDestination={(value) => (destination = value)}
                 onChooseDestination={() => void selectDestination()}
-                onQueue={queueOperation}
+                onQueue={() => void queueOperation()}
+              />
+            </div>
+          {:else}
+            <div class="queue-import">
+              <ImportSurface
+                {importing}
+                {hovering}
+                onFiles={() => void openPicker(false)}
+                onFolder={() => void openPicker(true)}
               />
             </div>
           {/if}
           <QueuePanel
-            items={queue}
-            onRemove={(id) => (queue = queue.filter((item) => item.id !== id))}
+            items={queue.jobs}
+            paused={queue.paused}
+            activeJobId={queue.activeJobId}
+            onPause={(paused) => void pauseQueue(paused)}
+            onCancel={(id) => void cancelRecord(id)}
+            onRetry={(id) => void retryRecord(id)}
+            onRemove={(id) => void removeRecord(id)}
           />
         </div>
         {#if inspectorOpen}<button
@@ -326,3 +448,24 @@
     {/if}
   </main>
 </div>
+
+{#if closeConfirmation}
+  <div class="modal-backdrop" role="presentation">
+    <dialog open class="close-dialog" aria-labelledby="close-title">
+      <p class="section-label">Active job</p>
+      <h2 id="close-title">Stop processing and close Hunk?</h2>
+      <p>
+        The active chdman process will be cancelled. Source files and existing outputs stay
+        untouched.
+      </p>
+      <div>
+        <button class="secondary" type="button" onclick={() => (closeConfirmation = false)}
+          >Keep working</button
+        >
+        <button class="danger-button" type="button" onclick={() => void confirmClose()}
+          >Cancel job and close</button
+        >
+      </div>
+    </dialog>
+  </div>
+{/if}

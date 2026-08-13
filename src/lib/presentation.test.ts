@@ -33,6 +33,11 @@ describe('workbench presentation', () => {
     expect(defaultDestination(source, 'verify')).toBeNull();
   });
 
+  it('keeps the CUE descriptor name stable for split-track extraction', () => {
+    const chd = { ...source, primaryFile: '/games/Disc.chd', format: 'chd' as const };
+    expect(defaultDestination(chd, 'extractCd', true)).toBe('/games/Disc.cue');
+  });
+
   it('formats source sizes for compact list rows', () => {
     expect(formatBytes(999)).toBe('999 B');
     expect(formatBytes(1_250_000)).toBe('1.25 MB');

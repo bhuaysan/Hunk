@@ -38,6 +38,9 @@ Thumbs.db
 src-tauri/binaries/
 *.hunk-part
 *.hunk-tmp
+.hunk-*.tmp.*
+.hunk-*-track-*
+.hunk-*.write-probe
 
 Test/
 *.[iI][sS][oO]
