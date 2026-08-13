@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification, M0 repository foundation and M1 source discovery completed.
+Status: accepted specification; M0–M2 and M4 completed, M3 remains pending.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -175,10 +175,14 @@ Target commit: `feat(core): add durable verified job queue`
 
 ### M4 — Workbench UI
 
-- [ ] Build import, source list, contextual inspector, destination selection, and track band.
-- [ ] Add create, extract, verify, and info flows.
-- [ ] Add explicit ISO media selection and advanced options.
-- [ ] Add queue and history views, conflict handling, logs, and human-readable errors.
+- [x] Build import, source list, contextual inspector, destination selection, and track band.
+- [x] Add create, extract, verify, and info flows.
+- [x] Add explicit ISO media selection and advanced options.
+- [x] Add queue and history views, conflict handling, logs, and human-readable errors.
+
+The workbench prepares typed queue entries in the webview. Execution, durable queue and history
+hydration, progress events, cancellation, and retry remain owned by the M3 backend milestone; the UI
+is intentionally ready for those narrow commands without receiving general filesystem or shell access.
 
 Target commits:
 

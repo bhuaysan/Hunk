@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- A responsive optical workbench with native file/folder import, drag and drop, contextual source inspection, destination and advanced conversion controls, a patterned track band, prepared queue, and history views.
+- Explicit CD/DVD selection for ISO sources, output-conflict feedback, validation guidance, and safe create, extract, verify, and information workflows ready for the durable job engine.
 - Safe integration for the pinned MAME 0.289 `chdman`, including capability checks and structured information, progress, verification, and error parsing.
 - Recursive CUE/BIN, GDI, ISO, and CHD source discovery with source-set de-duplication.
 - Structured validation for missing, duplicate, escaping, unreadable, and malformed track references.
