@@ -36,6 +36,8 @@ jobs:
             patchelf \
             python3 \
             xvfb
+          sudo apt-get clean
+          sudo docker system prune --all --force
       - name: Install pinned Flatpak runtime and SDK
         run: |
           sudo flatpak remote-add --if-not-exists flathub \
