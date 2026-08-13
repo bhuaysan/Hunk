@@ -40,6 +40,7 @@
         "files": {
           "/usr/share/doc/hunk/THIRD_PARTY_NOTICES.md": "../THIRD_PARTY_NOTICES.md",
           "/usr/share/applications/app.hunk.Hunk.desktop": "../packaging/app.hunk.Hunk.desktop",
+          "/usr/share/icons/hicolor/512x512/apps/app.hunk.Hunk.png": "icons/icon.png",
           "/usr/share/licenses/hunk/LICENSE": "../LICENSE",
           "/usr/share/licenses/hunk/mame": "binaries/mame-mame0289-compliance",
           "/usr/share/metainfo/app.hunk.Hunk.metainfo.xml": "../packaging/app.hunk.Hunk.metainfo.xml"

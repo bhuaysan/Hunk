@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- Included the canonical desktop icon name in AppImage packages so Linux launchers can resolve it
+  reliably.
+
 ## [0.1.0] - 2026-08-13
 
 ### Changed
