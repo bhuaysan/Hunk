@@ -21,3 +21,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Automated formatting, type, frontend build, Rust lint, and Rust test checks.
 - Equivalent English and German project entry points.
 - Initial product, implementation, documentation, and release specification.
+- End-to-end conversion validation with generated CD/DVD fixtures, deterministic safety fault coverage, approved-sidecar round trips, and an opt-in local representative-media harness.

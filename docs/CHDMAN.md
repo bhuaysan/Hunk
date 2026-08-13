@@ -24,6 +24,18 @@ HUNK_CHDMAN=src-tauri/binaries/chdman-x86_64-unknown-linux-gnu \
   --test chdman_process approved_real_binary_reports_required_capabilities -- --ignored
 ```
 
+To generate tiny redistributable CD/DVD fixtures at test time and exercise create, verify, info,
+extract, and recreate round trips through the full job engine:
+
+```sh
+HUNK_CHDMAN=src-tauri/binaries/chdman-x86_64-unknown-linux-gnu \
+  cargo test --manifest-path src-tauri/Cargo.toml \
+  --test end_to_end generated_fixture_round_trip_with_real_chdman -- --ignored --exact
+```
+
+The manually dispatched `Approved chdman` workflow runs both checks. No generated disc or CHD data
+is retained as an artifact or committed to the repository.
+
 ## Runtime contract
 
 Before its first operation, the backend checks both the exact version and the presence of `createcd`, `createdvd`, `extractcd`, `extractdvd`, `verify`, and `info`. Paths are passed directly as process arguments. Hunk never exposes `--force`, never offers `verify --fix`, and never treats unknown progress text as proof of completion.

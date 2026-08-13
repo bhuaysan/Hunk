@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification; M0–M5 completed.
+Status: accepted specification; M0–M6 completed.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -209,10 +209,17 @@ Target commit: `feat(app): add localization and accessibility`
 
 ### M6 — End-to-end validation
 
-- [ ] Generate small redistributable fixtures at test time for CI.
-- [ ] Provide an explicitly invoked local harness for the ignored `Test/` directory.
-- [ ] Cover cancellation, crashes, low space, permissions, collisions, corrupt input, and malformed sidecar output.
-- [ ] Confirm that no source is modified by success or failure paths.
+- [x] Generate small redistributable fixtures at test time for CI.
+- [x] Provide an explicitly invoked local harness for the ignored `Test/` directory.
+- [x] Cover cancellation, crashes, low space, permissions, collisions, corrupt input, and malformed sidecar output.
+- [x] Confirm that no source is modified by success or failure paths.
+
+The normal Rust suite uses a controllable process double to exercise the complete durable job path
+and its failure modes without storing media in Git. The opt-in approved-sidecar workflow generates
+small deterministic CD and DVD sources at runtime and performs create/verify/info/extract/recreate
+round trips. `scripts/test-local-media.sh` is the only supported entry point for the ignored local
+representative-data harness; all outputs are written to temporary storage and every input is checked
+again after processing.
 
 Target commit: `test: add end-to-end conversion coverage`
 

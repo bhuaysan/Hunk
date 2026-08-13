@@ -82,6 +82,14 @@ enum ExecutionError {
 }
 
 impl JobEngine {
+    pub fn open(
+        database_path: &Path,
+        program: PathBuf,
+        events: Arc<dyn EventSink>,
+    ) -> Result<Arc<Self>, String> {
+        Self::new(JobStore::open(database_path)?, program, events)
+    }
+
     pub fn new(
         store: JobStore,
         program: PathBuf,

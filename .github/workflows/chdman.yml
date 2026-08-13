@@ -30,3 +30,9 @@ jobs:
         run: >-
           cargo test --manifest-path src-tauri/Cargo.toml
           --test chdman_process approved_real_binary_reports_required_capabilities -- --ignored
+      - name: Run generated fixture round trips
+        env:
+          HUNK_CHDMAN: src-tauri/binaries/chdman-x86_64-unknown-linux-gnu
+        run: >-
+          cargo test --manifest-path src-tauri/Cargo.toml
+          --test end_to_end generated_fixture_round_trip_with_real_chdman -- --ignored --exact
