@@ -6,7 +6,7 @@ Hunk is a modern, local desktop workbench for creating and managing CHD images u
 
 ## Current status
 
-The repository foundation, source discovery, pinned `chdman` integration, durable verified job engine, responsive localized workbench, accessibility pass, and end-to-end validation are complete. Hunk recursively recognizes CUE/BIN, GDI, ISO, and CHD inputs, groups referenced track files into source sets, processes them through a collision-safe serial queue, and retains the latest 100 job records locally. Linux packaging is the next implementation milestone.
+The repository foundation, source discovery, pinned `chdman` integration, durable verified job engine, responsive localized workbench, accessibility pass, end-to-end validation, and Linux packaging are complete. Hunk recursively recognizes CUE/BIN, GDI, ISO, and CHD inputs, groups referenced track files into source sets, processes them through a collision-safe serial queue, and retains the latest 100 job records locally. Public release preparation is the next implementation milestone.
 
 The accepted scope and safety model live in [the implementation plan](docs/IMPLEMENTATION_PLAN.md). The concise public direction is in [the roadmap](ROADMAP.md).
 
@@ -46,6 +46,19 @@ After building the approved sidecar, the ignored local `Test/` data can be valid
 
 The harness expects exactly the three representative source sets described in the implementation
 plan, writes every output to temporary storage, and confirms that all source files remain unchanged.
+
+### Linux packages
+
+The manually dispatched packaging workflow and the local packaging script produce x86_64 AppImage
+and Flatpak artifacts without publishing a release:
+
+```sh
+./scripts/build-linux-packages.sh
+```
+
+The artifact set includes checksums, the exact MAME source archive used for `chdman`, and the
+applicable license texts. Build dependencies, Flatpak portal behavior, drag-and-drop limitations, and
+smoke-test instructions are documented in [the Linux packaging guide](docs/LINUX_PACKAGING.md).
 
 ## License
 

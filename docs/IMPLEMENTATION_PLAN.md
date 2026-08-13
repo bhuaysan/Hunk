@@ -1,6 +1,6 @@
 # Hunk implementation plan
 
-Status: accepted specification; M0–M6 completed.
+Status: accepted specification; M0–M7 completed.
 
 This document is the canonical specification for Hunk. Update it when a milestone is completed or an accepted decision changes. `ROADMAP.md` is the shorter public overview; `CHANGELOG.md` records delivered behavior.
 
@@ -225,10 +225,18 @@ Target commit: `test: add end-to-end conversion coverage`
 
 ### M7 — Linux packaging
 
-- [ ] Produce Linux x86_64 Flatpak and AppImage artifacts.
-- [ ] Add desktop entry, icons, AppStream metadata, third-party notices, and sidecar source/license compliance.
-- [ ] Exercise Flatpak portals and document drag-and-drop limitations under sandboxing.
-- [ ] Smoke-test Fedora KDE/Wayland and the selected oldest supported build baseline.
+- [x] Produce Linux x86_64 Flatpak and AppImage artifacts.
+- [x] Add desktop entry, icons, AppStream metadata, third-party notices, and sidecar source/license compliance.
+- [x] Exercise Flatpak portals and document drag-and-drop limitations under sandboxing.
+- [x] Smoke-test Fedora KDE/Wayland and the selected oldest supported build baseline.
+
+AppImages use Ubuntu 22.04 as the oldest supported native build baseline. Flatpak uses GNOME runtime
+50 and retains host filesystem access because resolving descriptor dependencies and publishing next
+to arbitrary selected sources cannot be represented reliably by document-portal grants alone. The
+webview still has no filesystem or shell access. `app.hunk.Hunk` is the stable desktop application
+identifier; it replaces the unreleased scaffold identifier before any user data or packages exist.
+Official artifact sets keep the verified MAME source archive alongside both packages and install
+MAME's complete license directory in each package.
 
 Target commit: `build: package Hunk for Linux`
 

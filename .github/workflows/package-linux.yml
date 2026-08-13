@@ -1,0 +1,80 @@
+name: Linux packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: AppImage and Flatpak (x86_64)
+    runs-on: ubuntu-22.04
+    env:
+      APPIMAGE_EXTRACT_AND_RUN: 1
+      HUNK_BUILD_JOBS: 4
+      LDAI_NO_APPSTREAM: 1
+      NO_STRIP: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux build and validation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes \
+            appstream \
+            build-essential \
+            desktop-file-utils \
+            file \
+            flatpak \
+            flatpak-builder \
+            libayatana-appindicator3-dev \
+            libfuse2 \
+            librsvg2-dev \
+            libsdl2-dev \
+            libwebkit2gtk-4.1-dev \
+            patchelf \
+            python3 \
+            xvfb
+      - name: Install pinned Flatpak runtime and SDK
+        run: |
+          sudo flatpak remote-add --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install --noninteractive --or-update flathub \
+            org.gnome.Platform//50 org.gnome.Sdk//50
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: pnpm install --frozen-lockfile
+      - name: Build pinned sidecar and compliance source
+        run: ./scripts/build-chdman.sh
+      - name: Validate and build Linux packages
+        run: ./scripts/build-linux-packages.sh
+      - name: Smoke-test AppImage under X11 fallback
+        run: >-
+          xvfb-run --auto-servernum
+          ./scripts/smoke-test-linux-package.sh --appimage
+          src-tauri/target/release/bundle/appimage/*.AppImage
+      - name: Smoke-test Flatpak under X11 fallback
+        run: >-
+          xvfb-run --auto-servernum
+          ./scripts/smoke-test-linux-package.sh --flatpak
+          src-tauri/target/release/bundle/flatpak/Hunk_x86_64.flatpak
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hunk-linux-x86_64
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/flatpak/*.flatpak
+            src-tauri/target/release/bundle/SHA256SUMS
+            src-tauri/binaries/mame-mame0289-source.tar.gz
+            src-tauri/binaries/mame-mame0289-compliance/

@@ -14,7 +14,11 @@ Run:
 ./scripts/build-chdman.sh
 ```
 
-The script builds only the approved `chdman` target and writes the untracked Tauri sidecar to `src-tauri/binaries/chdman-x86_64-unknown-linux-gnu`. It refuses to replace an existing sidecar. Set `HUNK_BUILD_JOBS` to limit parallel compilation, or pass a destination directory as the first argument.
+The script builds only the approved `chdman` target and writes the untracked Tauri sidecar to
+`src-tauri/binaries/chdman-x86_64-unknown-linux-gnu`. It also retains the verified source archive and
+copies MAME's `COPYING` and `docs/legal` files into the same ignored staging directory for Linux
+package compliance. It refuses to replace any existing output. Set `HUNK_BUILD_JOBS` to limit
+parallel compilation, or pass a destination directory as the first argument.
 
 To run the opt-in integration check against the resulting executable:
 
@@ -42,4 +46,10 @@ Before its first operation, the backend checks both the exact version and the pr
 
 ## License and distribution
 
-MAME is a separate work made available under the GNU General Public License version 2, with individual source files and bundled components carrying the notices recorded in MAME's `COPYING` and `docs/legal` directory. The build script does not copy a generated executable or MAME source into Git. Linux packaging must ship the applicable MAME copyright and license texts and meet the corresponding source-code obligations; that compliance bundle remains part of milestone M7.
+MAME is a separate work made available under the GNU General Public License version 2, with
+individual source files and bundled components carrying the notices recorded in MAME's `COPYING` and
+`docs/legal` directory. The build script does not copy a generated executable or MAME source into
+Git. Each Linux artifact set ships the verified source archive alongside the packages, and both
+installed packages include the license directory. Details are recorded in
+[`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and the
+[Linux packaging guide](LINUX_PACKAGING.md).

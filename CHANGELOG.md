@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Reproducible Linux x86_64 AppImage and Flatpak builds with desktop integration, AppStream metadata,
+  portal guidance, Fedora KDE/Wayland and Ubuntu baseline smoke checks, and complete bundled
+  `chdman` license/source compliance artifacts.
 - A durable serial job engine with preflight checks, pause/resume, cancellation, retry, bounded logs, progress events, SQLite settings, and the latest 100 history records.
 - Verified temporary CHD creation, collision-safe publication, safe cancellation cleanup, multi-file CD extraction ordering, and interrupted-job recovery after restart.
 - A responsive optical workbench with native file/folder import, drag and drop, contextual source inspection, destination and advanced conversion controls, a patterned track band, prepared queue, and history views.

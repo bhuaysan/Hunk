@@ -4,3 +4,4 @@ src-tauri/target
 Test
 LICENSE
 pnpm-lock.yaml
+packaging/*.hbs

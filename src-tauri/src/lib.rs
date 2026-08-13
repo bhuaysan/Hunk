@@ -140,7 +140,7 @@ fn resolve_chdman(app: &tauri::AppHandle) -> PathBuf {
         return PathBuf::from(path);
     }
 
-    let file_name = if cfg!(all(target_os = "linux", target_arch = "x86_64")) {
+    let target_file_name = if cfg!(all(target_os = "linux", target_arch = "x86_64")) {
         "chdman-x86_64-unknown-linux-gnu"
     } else if cfg!(target_os = "windows") {
         "chdman.exe"
@@ -149,16 +149,54 @@ fn resolve_chdman(app: &tauri::AppHandle) -> PathBuf {
     };
     let mut candidates = Vec::new();
     if let Ok(resource_directory) = app.path().resource_dir() {
-        candidates.push(resource_directory.join(file_name));
-        candidates.push(resource_directory.join("binaries").join(file_name));
+        add_chdman_candidates(&mut candidates, &resource_directory, target_file_name);
+    }
+    if let Ok(executable) = std::env::current_exe() {
+        if let Some(executable_directory) = executable.parent() {
+            add_chdman_candidates(&mut candidates, executable_directory, target_file_name);
+        }
     }
     candidates.push(
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("binaries")
-            .join(file_name),
+            .join(target_file_name),
     );
     candidates
         .into_iter()
         .find(|candidate| candidate.is_file())
-        .unwrap_or_else(|| PathBuf::from(file_name))
+        .unwrap_or_else(|| PathBuf::from("chdman"))
+}
+
+fn add_chdman_candidates(candidates: &mut Vec<PathBuf>, directory: &Path, target_file_name: &str) {
+    candidates.push(directory.join("chdman"));
+    candidates.push(directory.join(target_file_name));
+    candidates.push(directory.join("binaries").join(target_file_name));
+    candidates.push(directory.join("lib").join("hunk").join("chdman"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::add_chdman_candidates;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn packaged_sidecar_candidates_cover_tauri_and_flatpak_layouts() {
+        let mut candidates = Vec::new();
+
+        add_chdman_candidates(
+            &mut candidates,
+            Path::new("/app"),
+            "chdman-x86_64-unknown-linux-gnu",
+        );
+
+        assert_eq!(
+            candidates,
+            vec![
+                PathBuf::from("/app/chdman"),
+                PathBuf::from("/app/chdman-x86_64-unknown-linux-gnu"),
+                PathBuf::from("/app/binaries/chdman-x86_64-unknown-linux-gnu"),
+                PathBuf::from("/app/lib/hunk/chdman"),
+            ]
+        );
+    }
 }

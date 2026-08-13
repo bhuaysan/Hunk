@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Hunk
+GenericName=CHD Workbench
+GenericName[de]=CHD-Werkbank
+Comment=Create and manage optical CHD images
+Comment[de]=Optische CHD-Abbilder erstellen und verwalten
+Exec=hunk
+Icon=app.hunk.Hunk
+Terminal=false
+Categories=Utility;FileTools;
+Keywords=CHD;disc;image;verify;extract;
+Keywords[de]=CHD;Disc;Abbild;Prüfen;Extrahieren;
+StartupNotify=true
+StartupWMClass=Hunk

@@ -1,0 +1,34 @@
+id: app.hunk.Hunk
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+command: hunk
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Hunk is a disc-image workbench: it must read arbitrary selected source sets and publish output
+  # beside them. Portals still provide the dialogs, but document-portal grants alone cannot cover
+  # descriptor dependencies or output publication beside a single selected file.
+  - --filesystem=host
+
+modules:
+  - name: hunk
+    buildsystem: simple
+    build-commands:
+      - cp -a bin share /app/
+      - rm -f /app/share/applications/Hunk.desktop /app/share/applications/hunk.desktop
+      - install -Dm644 app.hunk.Hunk.desktop /app/share/applications/app.hunk.Hunk.desktop
+      - install -Dm644 app.hunk.Hunk.metainfo.xml /app/share/metainfo/app.hunk.Hunk.metainfo.xml
+      - install -Dm644 icon.png /app/share/icons/hicolor/512x512/apps/app.hunk.Hunk.png
+    sources:
+      - type: archive
+        path: hunk-linux.tar.gz
+      - type: file
+        path: app.hunk.Hunk.desktop
+      - type: file
+        path: app.hunk.Hunk.metainfo.xml
+      - type: file
+        path: ../src-tauri/icons/icon.png

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>app.hunk.Hunk</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Hunk</name>
+  <summary>Create and manage optical CHD images</summary>
+  <summary xml:lang="de">Optische CHD-Abbilder erstellen und verwalten</summary>
+  <developer id="app.hunk">
+    <name>Hunk contributors</name>
+  </developer>
+  <description>
+    <p>
+      Hunk is a local workbench for discovering, creating, extracting, inspecting, and verifying
+      optical CHD images used by emulators.
+    </p>
+    <p xml:lang="de">
+      Hunk ist eine lokale Werkbank zum Erkennen, Erstellen, Extrahieren, Untersuchen und Prüfen
+      optischer CHD-Abbilder für Emulatoren.
+    </p>
+    <p>
+      It supports CUE/BIN, GDI, ISO, and CHD sources, preserves every source file, and verifies each
+      newly created CHD before publishing it.
+    </p>
+    <p xml:lang="de">
+      Hunk unterstützt CUE/BIN-, GDI-, ISO- und CHD-Quellen, bewahrt alle Quelldateien und prüft
+      jedes neu erstellte CHD vor der Veröffentlichung.
+    </p>
+  </description>
+  <launchable type="desktop-id">app.hunk.Hunk.desktop</launchable>
+  <releases>
+    <release version="0.0.0" date="2026-08-13" type="development">
+      <description>
+        <p>Initial development build of the optical CHD workbench.</p>
+        <p xml:lang="de">Erster Entwicklungsstand der optischen CHD-Werkbank.</p>
+      </description>
+    </release>
+  </releases>
+  <content_rating type="oars-1.1" />
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </recommends>
+</component>

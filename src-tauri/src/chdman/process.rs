@@ -161,8 +161,10 @@ Usage:
     #[test]
     fn approved_pin_matches_the_build_recipe() {
         let recipe = include_str!("../../../scripts/build-chdman.sh");
+        let pin = include_str!("../../../scripts/mame-pin.sh");
 
-        assert!(recipe.contains(APPROVED_MAME_TAG));
-        assert!(recipe.contains(APPROVED_MAME_COMMIT));
+        assert!(recipe.contains("mame-pin.sh"));
+        assert!(pin.contains(APPROVED_MAME_TAG));
+        assert!(pin.contains(APPROVED_MAME_COMMIT));
     }
 }

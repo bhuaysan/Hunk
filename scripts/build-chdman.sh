@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly MAME_TAG="mame0289"
-readonly MAME_COMMIT="f34f02505e32c1993c6a782b6814232cbfc74e36"
-readonly MAME_ARCHIVE_SHA256="17d50a6effe503e5cd23818daf42ee2a60f471d1cda41c13e0e7cc4ae78c5e11"
-readonly MAME_ARCHIVE_URL="https://github.com/mamedev/mame/archive/${MAME_COMMIT}.tar.gz"
 readonly SCRIPT_DIRECTORY="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./mame-pin.sh
+source "${SCRIPT_DIRECTORY}/mame-pin.sh"
 readonly REPOSITORY_DIRECTORY="$(cd -- "${SCRIPT_DIRECTORY}/.." && pwd)"
 readonly OUTPUT_DIRECTORY="${1:-${REPOSITORY_DIRECTORY}/src-tauri/binaries}"
 readonly OUTPUT_BINARY="${OUTPUT_DIRECTORY}/chdman-x86_64-unknown-linux-gnu"
+readonly OUTPUT_SOURCE_ARCHIVE="${OUTPUT_DIRECTORY}/mame-${MAME_TAG}-source.tar.gz"
+readonly OUTPUT_COMPLIANCE_DIRECTORY="${OUTPUT_DIRECTORY}/mame-${MAME_TAG}-compliance"
 readonly BUILD_JOBS="${HUNK_BUILD_JOBS:-$(getconf _NPROCESSORS_ONLN)}"
 
 for required_tool in curl sha256sum tar make gcc g++ install; do
@@ -18,20 +18,23 @@ for required_tool in curl sha256sum tar make gcc g++ install; do
     fi
 done
 
-if [[ -e "${OUTPUT_BINARY}" || -L "${OUTPUT_BINARY}" ]]; then
-    printf 'Refusing to overwrite existing output: %s\n' "${OUTPUT_BINARY}" >&2
-    exit 1
-fi
+for output_path in \
+    "${OUTPUT_BINARY}" \
+    "${OUTPUT_SOURCE_ARCHIVE}" \
+    "${OUTPUT_COMPLIANCE_DIRECTORY}"; do
+    if [[ -e "${output_path}" || -L "${output_path}" ]]; then
+        printf 'Refusing to overwrite existing output: %s\n' "${output_path}" >&2
+        exit 1
+    fi
+done
 
 readonly WORK_DIRECTORY="$(mktemp -d)"
-readonly ARCHIVE_PATH="${WORK_DIRECTORY}/mame-${MAME_COMMIT}.tar.gz"
+readonly COMPLIANCE_OUTPUT_DIRECTORY="${WORK_DIRECTORY}/compliance"
+readonly ARCHIVE_PATH="${COMPLIANCE_OUTPUT_DIRECTORY}/mame-${MAME_TAG}-source.tar.gz"
 readonly SOURCE_DIRECTORY="${WORK_DIRECTORY}/mame"
 trap 'rm -rf -- "${WORK_DIRECTORY}"' EXIT
 
-printf 'Downloading MAME %s (%s)\n' "${MAME_TAG}" "${MAME_COMMIT}"
-curl --fail --location --proto '=https' --tlsv1.2 \
-    --output "${ARCHIVE_PATH}" "${MAME_ARCHIVE_URL}"
-printf '%s  %s\n' "${MAME_ARCHIVE_SHA256}" "${ARCHIVE_PATH}" | sha256sum --check --status
+"${SCRIPT_DIRECTORY}/prepare-mame-compliance.sh" "${COMPLIANCE_OUTPUT_DIRECTORY}"
 
 mkdir -- "${SOURCE_DIRECTORY}"
 tar --extract --gzip --file "${ARCHIVE_PATH}" \
@@ -58,5 +61,9 @@ make --directory "${SOURCE_DIRECTORY}" "${configuration_arguments[@]}" \
 make --directory "${PROJECT_DIRECTORY}" config=release "-j${BUILD_JOBS}" chdman
 
 mkdir --parents -- "${OUTPUT_DIRECTORY}"
+install --mode 0644 -- "${ARCHIVE_PATH}" "${OUTPUT_SOURCE_ARCHIVE}"
+cp --archive -- \
+    "${COMPLIANCE_OUTPUT_DIRECTORY}/mame-${MAME_TAG}-compliance" \
+    "${OUTPUT_COMPLIANCE_DIRECTORY}"
 install --mode 0755 -- "${SOURCE_DIRECTORY}/chdman" "${OUTPUT_BINARY}"
 printf 'Built approved chdman sidecar: %s\n' "${OUTPUT_BINARY}"

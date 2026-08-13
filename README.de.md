@@ -6,7 +6,7 @@ Hunk ist eine moderne, lokale Desktop-Werkbank zum Erstellen und Verwalten von C
 
 ## Aktueller Stand
 
-Das Repository-Grundgerüst, die Quelldateierkennung, die gepinnte `chdman`-Integration, die dauerhafte verifizierte Job-Engine, die responsive lokalisierte Workbench, die Barrierefreiheitsprüfung und die Ende-zu-Ende-Validierung sind fertig. Hunk erkennt CUE/BIN-, GDI-, ISO- und CHD-Eingaben rekursiv, fasst referenzierte Trackdateien zu Quellsätzen zusammen, verarbeitet sie in einer kollisionssicheren seriellen Warteschlange und bewahrt die letzten 100 Job-Einträge lokal auf. Als Nächstes folgt die Linux-Paketierung.
+Das Repository-Grundgerüst, die Quelldateierkennung, die gepinnte `chdman`-Integration, die dauerhafte verifizierte Job-Engine, die responsive lokalisierte Workbench, die Barrierefreiheitsprüfung, die Ende-zu-Ende-Validierung und die Linux-Paketierung sind fertig. Hunk erkennt CUE/BIN-, GDI-, ISO- und CHD-Eingaben rekursiv, fasst referenzierte Trackdateien zu Quellsätzen zusammen, verarbeitet sie in einer kollisionssicheren seriellen Warteschlange und bewahrt die letzten 100 Job-Einträge lokal auf. Als Nächstes folgt die Vorbereitung der öffentlichen Veröffentlichung.
 
 Der festgelegte Umfang und das Sicherheitsmodell stehen im [Implementierungsplan](docs/IMPLEMENTATION_PLAN.md). Die kompakte öffentliche Planung steht in der [Roadmap](ROADMAP.md).
 
@@ -49,6 +49,19 @@ geprüft werden:
 Der Harness erwartet genau die drei im Implementierungsplan beschriebenen repräsentativen
 Quellsätze, schreibt sämtliche Ausgaben in temporären Speicher und bestätigt, dass alle Quelldateien
 unverändert bleiben.
+
+### Linux-Pakete
+
+Der manuell gestartete Paketierungs-Workflow und das lokale Paketierungsskript erzeugen x86_64-
+AppImage- und Flatpak-Artefakte, ohne eine Veröffentlichung anzulegen:
+
+```sh
+./scripts/build-linux-packages.sh
+```
+
+Der Artefaktsatz enthält Prüfsummen, das exakt für `chdman` verwendete MAME-Quellarchiv und die
+zugehörigen Lizenztexte. Build-Abhängigkeiten, Flatpak-Portalverhalten, Einschränkungen bei Drag-and-
+drop und Smoke-Test-Anweisungen beschreibt der [Linux-Paketierungsleitfaden](docs/LINUX_PACKAGING.md).
 
 ## Lizenz
 
