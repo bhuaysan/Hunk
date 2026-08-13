@@ -23,6 +23,7 @@ jobs:
           sudo apt-get install --no-install-recommends --yes \
             appstream \
             build-essential \
+            dbus \
             desktop-file-utils \
             file \
             flatpak \

@@ -20,7 +20,6 @@ readonly CHECKSUM_FILE="${BUNDLE_DIRECTORY}/SHA256SUMS"
 readonly FLATPAK_PAYLOAD="${REPOSITORY_DIRECTORY}/packaging/hunk-linux.tar.gz"
 readonly FLATPAK_MANIFEST="${REPOSITORY_DIRECTORY}/packaging/app.hunk.Hunk.yml"
 readonly PACKAGE_WORK_ROOT="${TARGET_DIRECTORY}/package-work"
-readonly USER_FLATPAK_DIRECTORY="${HOME:?HOME must be set}/.local/share/flatpak"
 
 for required_tool in dpkg-deb file find flatpak grep mktemp pnpm sed sha256sum tar uname; do
     if ! command -v "${required_tool}" >/dev/null 2>&1; then
@@ -30,18 +29,19 @@ for required_tool in dpkg-deb file find flatpak grep mktemp pnpm sed sha256sum t
 done
 
 if flatpak --user info org.flatpak.Builder >/dev/null 2>&1; then
-    if [[ ! -d "${USER_FLATPAK_DIRECTORY}" ]]; then
-        printf 'The user Flatpak installation is missing: %s\n' \
-            "${USER_FLATPAK_DIRECTORY}" >&2
-        exit 1
-    fi
     flatpak_builder=(
         flatpak run
         --user
         "--filesystem=${REPOSITORY_DIRECTORY}"
-        "--filesystem=${USER_FLATPAK_DIRECTORY}:ro"
         org.flatpak.Builder
     )
+    if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
+        if ! command -v dbus-run-session >/dev/null 2>&1; then
+            printf 'The sandboxed Flatpak builder requires dbus-run-session on headless hosts.\n' >&2
+            exit 1
+        fi
+        flatpak_builder=(dbus-run-session -- "${flatpak_builder[@]}")
+    fi
 elif command -v flatpak-builder >/dev/null 2>&1; then
     flatpak_builder=(flatpak-builder)
 else

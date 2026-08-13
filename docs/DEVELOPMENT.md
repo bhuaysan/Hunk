@@ -17,9 +17,9 @@ sudo apt-get install build-essential libayatana-appindicator3-dev \
   librsvg2-dev libsdl2-dev libwebkit2gtk-4.1-dev python3
 ```
 
-Packaging additionally needs `appstreamcli`, `desktop-file-validate`, `dpkg-deb`, `file`, Flatpak,
-and preferably the sandboxed `org.flatpak.Builder`. A distribution-provided `flatpak-builder` is a
-fallback when it is compatible with the selected SDK.
+Packaging additionally needs `appstreamcli`, `dbus-run-session`, `desktop-file-validate`,
+`dpkg-deb`, `file`, Flatpak, and preferably the sandboxed `org.flatpak.Builder`. A
+distribution-provided `flatpak-builder` is a fallback when it is compatible with the selected SDK.
 
 ## Setup and launch
 
